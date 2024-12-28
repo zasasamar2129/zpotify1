@@ -1,33 +1,10 @@
-"""MIT License
-
-Copyright (c) 2022 Daniel
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-"""
-
 from spotipy.oauth2 import SpotifyClientCredentials
 from datetime import datetime
 from pyrogram import filters
-from pyrogram.types import InlineKeyboardButton,InlineKeyboardMarkup
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.raw.functions import Ping
-from mbot import LOG_GROUP, OWNER_ID, SUDO_USERS, Mbot,AUTH_CHATS
-from os import execvp,sys
+from mbot import LOG_GROUP, OWNER_ID, SUDO_USERS, Mbot, AUTH_CHATS
+from os import execvp, sys
 import os
 import spotipy
 import psutil
@@ -35,27 +12,33 @@ from asyncio import sleep
 from pyrogram import Client, filters
 
 @Mbot.on_message(filters.command("start"))
-async def start(client,message):
+async def start(client, message):
     await message.delete()
 
-    reply_markup = [[
-        InlineKeyboardButton(
-            text=" 📱 Bot Channel", url="https://t.me/Zpotify1"),
-        InlineKeyboardButton(
-            text="⛓️‍💥 Repo",
-            url="https://github.com/zasasamar2129/zpotify1"),
-        InlineKeyboardButton(text="🔍 Help",callback_data="helphome")
+    reply_markup = [
+        [
+            InlineKeyboardButton(
+                text=" 📱 Bot Channel", url="https://t.me/Zpotify1"),
+            InlineKeyboardButton(
+                text="⛓️‍💥 Repo",
+                url="https://github.com/zasasamar2129/zpotify1"),
+            InlineKeyboardButton(text="🔍 Help", callback_data="helphome")
         ],
         [
             InlineKeyboardButton(text="💵 Donate",
             url="https://www.buymeacoffee.com/zasasamar"),
-        ]]
+        ]
+    ]
+    
     if LOG_GROUP:
-
         invite_link = await client.create_chat_invite_link(chat_id=(int(LOG_GROUP) if str(LOG_GROUP).startswith("-100") else LOG_GROUP))
         reply_markup.append([InlineKeyboardButton("📜 LOG Channel", url=invite_link.invite_link)])
+    
+    reply_markup.append([InlineKeyboardButton(text="❌", callback_data="close")])
+    
     return await message.reply_text(f"👋 Hello {message.from_user.first_name}, I'm  𝓩𝓟𝓞𝓣𝓘𝓕𝓨. a music downloader bot that supports Download from Youtube,Spotify,Soundcloud,Deezer and more.",
                     reply_markup=InlineKeyboardMarkup(reply_markup))
+
 
 ############################RESTART######################################
 
@@ -66,6 +49,9 @@ async def restart(_, message):
         [
             InlineKeyboardButton("🫡 Yes", callback_data="restart_yes"),
             InlineKeyboardButton("🙅‍♂️ No", callback_data="restart_no")
+        ],
+        [
+            InlineKeyboardButton(text="❌", callback_data="close")
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -86,7 +72,7 @@ async def handle_restart_query(_, callback_query):
 
 
 @Mbot.on_message(filters.command("log") & filters.chat(SUDO_USERS))
-async def send_log(_,message):
+async def send_log(_, message):
     await message.reply_document("bot.log")
 
 @Mbot.on_message(filters.command("cpu") & filters.chat(SUDO_USERS))
@@ -104,7 +90,10 @@ async def ping(client, message):
 
 @Mbot.on_message(filters.command("donate"))
 async def donate(_, message):
-    keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("Donate", url="https://www.buymeacoffee.com/zasasamar")]])
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("Donate", url="https://www.buymeacoffee.com/zasasamar")],
+        [InlineKeyboardButton(text="❌", callback_data="close")]
+    ])
     await message.reply_text("If you would like to support the development of this bot, you can donate here:", reply_markup=keyboard)
 
 @Mbot.on_message(filters.command("info"))
@@ -231,7 +220,7 @@ async def stats(client, message):
     await message.reply_text(stats_text)
     
 
-    #Help message
+#Help message
 HELP = {
     "YouTube": (
         "1️⃣ **🌟 Download Music from YouTube**\n"
@@ -266,33 +255,42 @@ HELP = {
 
 
 @Mbot.on_message(filters.command("help"))
-async def help(_,message):
+async def help(_, message):
+    await message.delete()
     button = [
         [InlineKeyboardButton(text=i, callback_data=f"help_{i}")] for i in HELP
     ]
+    button.append([InlineKeyboardButton(text="❌", callback_data="close")])
     await message.reply_text(f"Hello **{message.from_user.first_name}**, I'm **𝓩𝓟𝓞𝓣𝓘𝓕𝓨**.\nI'm Here to download your music.",
                         reply_markup=InlineKeyboardMarkup(button))
                         
 @Mbot.on_callback_query(filters.regex(r"backdome"))
-async def backdo(_,query):
+async def backdo(_, query):
     button = [
         [InlineKeyboardButton(text=i, callback_data=f"help_{i}")] for i in HELP
     ]
-    button.append([InlineKeyboardButton(text="back", callback_data=f"backdome")])
+    button.append([InlineKeyboardButton(text="❌", callback_data="close")])
     await query.message.edit(f"Hello **{query.message.from_user.first_name}**, I'm **𝓩𝓟𝓞𝓣𝓘𝓕𝓨**.\nI'm Here to download your music.",
                         reply_markup=InlineKeyboardMarkup(button))     
     
 @Mbot.on_callback_query(filters.regex(r"help_(.*?)"))
-async def helpbtn(_,query):
-    i = query.data.replace("help_","")
-    button = InlineKeyboardMarkup([[InlineKeyboardButton("Back",callback_data="helphome")]])
+async def helpbtn(_, query):
+    i = query.data.replace("help_", "")
+    button = InlineKeyboardMarkup([
+        [InlineKeyboardButton("Back", callback_data="helphome")]
+    ])
     text = f"Help for **{i}**\n\n{HELP[i]}"
-    await query.message.edit(text = text,reply_markup=button)
+    await query.message.edit(text=text, reply_markup=button)
 
 @Mbot.on_callback_query(filters.regex(r"helphome"))
-async def help_home(_,query):
+async def help_home(_, query):
     button = [
         [InlineKeyboardButton(text=i, callback_data=f"help_{i}")] for i in HELP
     ]
+    button.append([InlineKeyboardButton(text="❌", callback_data="close")])
     await query.message.edit(f"Hello **{query.from_user.first_name}**, I'm **𝓩𝓟𝓞𝓣𝓘𝓕𝓨**.\nI'm Here to download your music.",
                         reply_markup=InlineKeyboardMarkup(button))
+
+@Mbot.on_callback_query(filters.regex(r"close"))
+async def close(_, query):
+    await query.message.delete()
