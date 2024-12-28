@@ -49,9 +49,6 @@ async def restart(_, message):
         [
             InlineKeyboardButton("🫡 Yes", callback_data="restart_yes"),
             InlineKeyboardButton("🙅‍♂️ No", callback_data="restart_no")
-        ],
-        [
-            InlineKeyboardButton(text="❌", callback_data="close")
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -256,7 +253,6 @@ HELP = {
 
 @Mbot.on_message(filters.command("help"))
 async def help(_, message):
-    await message.delete()
     button = [
         [InlineKeyboardButton(text=i, callback_data=f"help_{i}")] for i in HELP
     ]
