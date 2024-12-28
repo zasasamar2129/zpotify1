@@ -1,4 +1,4 @@
-# <div align="center">
+<div align="center">
   <a href="https://github.com/zasasamar2129/zpotify1">
     <kbd>
       <img width="250" src="https://files.catbox.moe/ppbwe6.jpg" alt="ZPOTIFY Logo">
