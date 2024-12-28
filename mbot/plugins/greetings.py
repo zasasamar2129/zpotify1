@@ -253,6 +253,7 @@ HELP = {
 
 @Mbot.on_message(filters.command("help"))
 async def help(_, message):
+    await message.delete()
     button = [
         [InlineKeyboardButton(text=i, callback_data=f"help_{i}")] for i in HELP
     ]
