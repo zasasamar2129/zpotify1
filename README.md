@@ -1,139 +1,122 @@
-<div align="center">
-    <a href="https://github.com/zasasamar2129/zpotify1">
-        <kbd>
-            <img width="250" src="https://files.catbox.moe/ppbwe6.jpg" alt="ZPOTIFY Logo">
-        </kbd>
-    </a>
-    
-## ***ZPOTIFY***
-    
+# <div align="center">
+  <a href="https://github.com/zasasamar2129/zpotify1">
+    <kbd>
+      <img width="250" src="https://files.catbox.moe/ppbwe6.jpg" alt="ZPOTIFY Logo">
+    </kbd>
+  </a>
+
+## **ZPOTIFY** 🎶
 </div>
+
+---
 
 # Spotify Downloader Bot
 
-[DEMO VERSION @z_downloadbot](https://t.me/z_downloadbot)
+[![Demo Bot](https://img.shields.io/badge/Try%20it%20out-%40z_downloadbot-blue?style=for-the-badge&logo=telegram)](https://t.me/z_downloadbot)
 
+## 🌟 About
+ZPOTIFY is a powerful and open-source Spotify downloader bot designed for Telegram. It offers an easy and efficient way to download your favorite tracks from Spotify with additional features planned for continuous improvement. While inspired by [@NeedMusicRobot](https://github.com/rozari0/NeedMusicRobot), ZPOTIFY is a completely independent project with unique features.
 
-### Is this source code used for [@z_downloadbot](https://t.me/z_downloadbot)?
-> No, this [bot](https://github.com/rozari0/NeedMusicRobot) was the inspiration to build our bot. You can see our bot is entirely different, and some features will be implemented in this repository.
+---
 
-## Deployment
+## 🚀 Deployment
 
-### Easy way to deploy on Local/VPS
-1. First, add variables in [config.env](https://github.com/zasasamar2129/zpotify1/blob/Latest/config.env):
-   ```sh
-   sudo apt update && apt upgrade -y 
+### Local/VPS Deployment
+1. **Install Dependencies:**
+   ```bash
+   sudo apt update && sudo apt upgrade -y
    sudo apt install git ffmpeg python3 python3-pip -y
-   git clone https://github.com/zasasamar2129/zpotify1.git 
+   ```
+2. **Clone Repository:**
+   ```bash
+   git clone https://github.com/zasasamar2129/zpotify1.git
    cd zpotify1
-   pip3 install -r requirements.txt 
-   python3 -m mbot 
+   ```
+3. **Install Requirements:**
+   ```bash
+   pip3 install -r requirements.txt
+   ```
+4. **Run the Bot:**
+   ```bash
+   python3 -m mbot
    ```
 
-### Docker
-1. Build and run the Docker image:
-   ```sh
+### Docker Deployment
+1. **Build and Run the Docker Image:**
+   ```bash
    docker build . -t musicbot
-   docker run musicbot  
+   docker run musicbot
    ```
 
+---
 
-
-## Config Example
+## 🔧 Configuration
 Add these variables in [config.env](https://github.com/zasasamar2129/zpotify1/blob/Latest/config.env):
 
 ### Required Environment Variables
-
-### Get `api_id` and `api_hash` from [my.telegram.org](https://my.telegram.org) (required)
-```sh
-API_ID = ""
-API_HASH = ""
-```
-
-### Your Telegram bot token (required)
-```sh
-BOT_TOKEN = ""
-```
-
-### ID of the owner of the bot (not username) (required)
-```sh
-OWNER_ID = ""
-```
-### Spotify Client Secret (get it from developers.spotify.com) (required)
-```sh
-SPOTIPY_CLIENT_SECRET = ""
-```
-
-### Spotify Client ID (get it from developers.spotify.com) (required)
-```sh
-SPOTIPY_CLIENT_ID = ""
+```env
+API_ID = ""              # Get this from https://my.telegram.org
+API_HASH = ""            # Get this from https://my.telegram.org
+BOT_TOKEN = ""           # Your bot token
+OWNER_ID = ""            # Your Telegram ID
+SPOTIPY_CLIENT_ID = ""  # Get this from developers.spotify.com
+SPOTIPY_CLIENT_SECRET = "" # Get this from developers.spotify.com
 ```
 
 ### Optional Environment Variables
-
-### Users with God permission (separate them with spaces) (optional)
-```sh
-SUDO_USERS = ""
+```env
+SUDO_USERS = ""          # Space-separated user IDs with admin permissions
+AUTH_CHATS = ""          # Space-separated chat IDs allowed to use the bot
+LOG_GROUP = ""           # ID of a log group (optional)
+BUG = ""                 # Error log group ID (optional)
+GENIUS_API = ""          # Genius API key (optional)
+XDG_CACHE_HOME = "~/.tmp" # Temporary file storage path (optional)
+FIXIE_SOCKS_HOST = ""    # Proxy URL (optional)
+F_SUB = False             # Enable forced subscription (default: False)
+F_SUB_CHANNEL_ID = ""    # Channel ID for forced subscription (optional)
+F_SUB_CHANNEL_INVITE_LINK = "" # Channel invite link for forced subscription (optional)
 ```
 
-### Chats that can use the bot (separate them with spaces) (optional)
-```sh
-AUTH_CHATS = ""
-```
+---
 
-### Group ID for the log channel or leave it empty if not required (optional)
-```sh
-LOG_GROUP = ""
-```
+## 💡 Features
+- 🎵 **High-Quality Downloads**
+- 🚀 **Fast and Reliable**
+- 🔄 **Playlist Support**
+- 🛠️ **Customizable via Environment Variables**
+- 📜 **Error Logging**
+- 🔒 **Secure Configuration**
 
+---
 
-### Add your group ID for getting error log messages or leave it empty if not required (optional)
-```sh
-BUG = ""
-```
+## 🍕 Support
+If you find this project useful, please consider buying me a pizza! 🍕
 
-### Get it from https://genius.com/developers (optional)
-```sh
-GENIUS_API = ""
-```
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Pizza-BrightGreen?style=for-the-badge&logo=buymeacoffee)](https://www.buymeacoffee.com/zasasamar)
 
-### Temporary file storage path (optional)
-```sh
-XDG_CACHE_HOME = "~/.tmp"
-```
+---
 
-### Paste your proxy URL here or leave it empty if not required (optional)
-```sh
-FIXIE_SOCKS_HOST = ""
-```
+## 📢 Feedback
+We value your input! Share your feedback and rate the bot:
 
-### Pass `True` to make F_Sub enabled (default to `False`) (optional)
-```sh
-F_SUB = False
-```
+[![Feedback](https://img.shields.io/badge/Feedback-Rate%20Our%20Bot-yellow?style=for-the-badge&logo=telegram)](https://t.me/dailychannelsbot?start=z_downloadbot)
 
-### Pass channel ID username or ID that starts with `-100` (optional)
-```sh
-F_SUB_CHANNEL_ID = ""
-```
+---
 
-### Pass the invite link to the channel (e.g., `https://t.me/username` or `https://t.me/+jwjjwjw`) (optional)
-```sh
-F_SUB_CHANNEL_INVITE_LINK = ""
-```
-
-## Donation
-> Please support me by buying me a pizza using the link below:
-[Buy Me A Pizza](https://www.buymeacoffee.com/zasasamar)
-
-## Feedback
-> Rate our bot [FEEDBACK](https://t.me/dailychannelsbot?start=z_downloadbot)
-
-## About
-> A Simple Open Source Spotify Downloader Bot for Telegram.
-
-## Contact
-> If you need any help or want to provide feedback, don't hesitate to contact me:
-
+## 📞 Contact
+Need help or have suggestions? Reach out:
 - [Instagram](https://instagram.com/zaco.game)
 - [Telegram](https://t.me/Itachi2129)
+
+---
+
+## 🌐 Community
+Join our community for updates and support:
+
+[![Join Telegram Channel](https://img.shields.io/badge/Join%20Telegram%20Channel-1DA1F2?style=for-the-badge&logo=telegram)](https://t.me/dailychannelsbot?start=z_downloadbot)
+
+---
+
+## 📜 License
+This project is licensed under the [Apache License 2.0](LICENSE).
+
