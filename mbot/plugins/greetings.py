@@ -9,16 +9,90 @@ import os
 import spotipy
 import psutil
 from asyncio import sleep
-from pyrogram import Client, filters
+import json
 
+# File to store banned users
+BAN_LIST_FILE = "banned_users.json"
+
+# Load banned users from file
+def load_banned_users():
+    if os.path.exists(BAN_LIST_FILE):
+        with open(BAN_LIST_FILE, "r") as f:
+            return set(json.load(f))
+    return set()
+
+# Save banned users to file
+def save_banned_users(banned_users):
+    with open(BAN_LIST_FILE, "w") as f:
+        json.dump(list(banned_users), f)
+        
+# List to store banned users
+banned_users = load_banned_users()
+
+# Command to ban a user
+@Mbot.on_message(filters.command("ban") & filters.user(SUDO_USERS))
+async def ban_user(client, message):
+    await message.delete()
+    if message.reply_to_message:
+        user_id = message.reply_to_message.from_user.id
+    elif len(message.command) == 2:
+        try:
+            user_id = int(message.command[1])
+        except ValueError:
+            await message.reply_text("⛔ Invalid user ID. Please provide a numeric user ID.")
+            return
+    else:
+        await message.reply_text("ℹ️ Usage: /ban <user_id> or reply to a user's message with /ban")
+        return
+
+    # Add the user to the ban list
+    banned_users.add(user_id)
+    save_banned_users(banned_users)  # Pass the updated banned_users set
+    await message.reply_text(f"User {user_id} has been banned successfully 💀.")
+
+# Command to unban a user
+@Mbot.on_message(filters.command("unban") & filters.user(SUDO_USERS))
+async def unban_user(client, message):
+    await message.delete()
+    if len(message.command) != 2:
+        await message.reply_text("ℹ️ Usage: /unban <user_id>")
+        return
+    try:
+        user_id = int(message.command[1])
+    except ValueError:
+        await message.reply_text("⛔ Invalid user ID. Please provide a numeric user ID.")
+        return
+
+    # Remove the user from the ban list
+    if user_id in banned_users:
+        banned_users.remove(user_id)
+        save_banned_users(banned_users)  # Pass the updated banned_users set
+        await message.reply_text(f"User {user_id} has been unbanned successfully 🟢.")
+    else:
+        await message.reply_text(f"User {user_id} is not in the ban list 📋.")
+
+# Command to view the ban list
+@Mbot.on_message(filters.command("banlist") & filters.user(SUDO_USERS))
+async def view_ban_list(client, message):
+    await message.delete()
+    if not banned_users:
+        await message.reply_text("🕊️ No users are currently banned.")
+    else:
+        ban_list = "\n".join(str(user_id) for user_id in banned_users)
+        await message.reply_text(f"Banned users:\n{ban_list}")
+
+# Modify existing commands to check if a user is banned
 @Mbot.on_message(filters.command("start"))
 async def start(client, message):
     await message.delete()
-
+    if message.from_user.id in banned_users:
+        await message.reply_text("You are banned from using this bot 💀.")
+        return
+    await message.delete()
     reply_markup = [
         [
             InlineKeyboardButton(
-                text=" 📱 Bot Channel", url="https://t.me/Zpotify1"),
+                text=" 🌐 Bot Channel", url="https://t.me/Zpotify1"),
             InlineKeyboardButton(
                 text="⛓️‍💥 Repo",
                 url="https://github.com/zasasamar2129/zpotify1"),
@@ -39,9 +113,7 @@ async def start(client, message):
     return await message.reply_text(f"👋 Hello {message.from_user.first_name}, I'm  𝓩𝓟𝓞𝓣𝓘𝓕𝓨. a music downloader bot that supports Download from Youtube,Spotify,Soundcloud,Deezer and more.",
                     reply_markup=InlineKeyboardMarkup(reply_markup))
 
-
 ############################RESTART######################################
-
 @Mbot.on_message(filters.command("restart") & filters.chat(OWNER_ID) & filters.private)
 async def restart(_, message):
     
@@ -64,29 +136,34 @@ async def handle_restart_query(_, callback_query):
     elif callback_query.data == "restart_no":
         await callback_query.answer("Bot restart has been cancelled.", show_alert=True)
         await callback_query.message.delete()
+
 ############################RESTART######################################
-
-
-
 @Mbot.on_message(filters.command("log") & filters.chat(SUDO_USERS))
 async def send_log(_, message):
+    await message.delete()
     await message.reply_document("bot.log")
 
 @Mbot.on_message(filters.command("cpu") & filters.chat(SUDO_USERS))
 async def cpu_usage(_, message):
+    await message.delete()
     cpu_percent = psutil.cpu_percent(interval=1)
     await message.reply_text(f"**CPU Usage:** `{cpu_percent}%`")
 
 @Mbot.on_message(filters.command("ping"))
 async def ping(client, message):
+    if message.from_user.id in banned_users:
+        await message.reply_text("You are banned from using this bot.")
+        return
     start = datetime.now()
     await client.invoke(Ping(ping_id=0))
     ms = (datetime.now() - start).microseconds / 1000
     await message.reply_text(f"**Pong!**\nResponse time: `{ms} ms`")
 
-
 @Mbot.on_message(filters.command("donate"))
 async def donate(_, message):
+    if message.from_user.id in banned_users:
+        await message.reply_text("You are banned from using this bot.")
+        return
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Donate", url="https://www.buymeacoffee.com/zasasamar")],
         [InlineKeyboardButton(text="❌", callback_data="close")]
@@ -95,6 +172,9 @@ async def donate(_, message):
 
 @Mbot.on_message(filters.command("info"))
 async def info(_, message):
+    if message.from_user.id in banned_users:
+        await message.reply_text("You are banned from using this bot.")
+        return
     info_text = (
     "💢 **Hello! I am 𝓩𝓟𝓞𝓣𝓘𝓕𝓨** 💢\n\n"
     "✨ **Here are the amazing things I can do for you:** ✨\n\n"
@@ -125,11 +205,13 @@ async def info(_, message):
     
     "💢 **Feel free to explore and use the commands to get the best out of this bot!** 💢"
 )
-
     await message.reply_text(info_text)
 
 @Mbot.on_message(filters.command("stats"))
 async def stats(client, message):
+    if message.from_user.id in banned_users:
+        await message.reply_text("You are banned from using this bot.")
+        return
     # Initial reply with a placeholder message
     fetching_message = await message.reply_text("Fetching stats...\n[                    ] 0%")
     
@@ -139,7 +221,6 @@ async def stats(client, message):
         await fetching_message.edit_text(f"Fetching stats...\n[{bar}] {progress}%")
         await sleep(0.5)  # Adjust sleep time to control animation speed
     
-
     # Gather system information
     os_type = sys.platform
     linux_type = " ".join(os.uname()) if hasattr(os, 'uname') else "N/A"
@@ -152,30 +233,25 @@ async def stats(client, message):
     ram_usage = memory.percent
     ram_available = memory.available / (1024 ** 2)
     used_ram = memory.used / (1024 ** 2)
-
     # Simulate database status (replace with actual database queries if available)
     db1_used_size = 116.23
     db1_free_size = 395.77
     db2_used_size = 10.47
     db2_free_size = 501.53
-
     # Simulate user and file counts (replace with actual queries if available)
     total_users = 61864
     total_files = 42590
     total_premium_users = 0
     total_premium_trials = 31916
-
     # Measure response times
     start = datetime.now()
     await client.invoke(Ping(ping_id=0))
     telegram_response_time = (datetime.now() - start).microseconds / 1000
-
     start = datetime.now()
     client_credentials_manager = SpotifyClientCredentials()
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
     sp.search("test")  # Dummy search to measure response time
     spotify_response_time = (datetime.now() - start).microseconds / 1000
-
     stats_text = (
     "⚡️ **𝓩𝓟𝓞𝓣𝓘𝓕𝓨 Server Status** ⚡️\n\n"
     
@@ -211,13 +287,10 @@ async def stats(client, message):
     f"✨ **Total Premium Users and Premium Trial Users:** {total_premium_users}\n"
     f"🌟 **Users Who Enjoyed Premium Trials and Plans:** {total_premium_trials}\n"
 )
-
-
     await fetching_message.delete()
     await message.reply_text(stats_text)
-    
 
-#Help message
+# Help message
 HELP = {
     "YouTube": (
         "1️⃣ **🌟 Download Music from YouTube**\n"
@@ -250,15 +323,17 @@ HELP = {
     ),
 }
 
-
 @Mbot.on_message(filters.command("help"))
 async def help(_, message):
+    if message.from_user.id in banned_users:
+        await message.reply_text("You are banned from using this bot.")
+        return
     await message.delete()
     button = [
         [InlineKeyboardButton(text=i, callback_data=f"help_{i}")] for i in HELP
     ]
     button.append([InlineKeyboardButton(text="❌", callback_data="close")])
-    await message.reply_text(f"Hello **{message.from_user.first_name}**, I'm **𝓩𝓟𝓞𝓣𝓘𝓕𝓨**.\nI'm Here to download your music.",
+    await message.reply_text(f"👋😊Hello **{message.from_user.first_name}**, I'm **𝓩𝓟𝓞𝓣𝓘𝓕𝓨**.\nI'm Here to download your music.",
                         reply_markup=InlineKeyboardMarkup(button))
                         
 @Mbot.on_callback_query(filters.regex(r"backdome"))
@@ -267,7 +342,7 @@ async def backdo(_, query):
         [InlineKeyboardButton(text=i, callback_data=f"help_{i}")] for i in HELP
     ]
     button.append([InlineKeyboardButton(text="❌", callback_data="close")])
-    await query.message.edit(f"Hello **{query.message.from_user.first_name}**, I'm **𝓩𝓟𝓞𝓣𝓘𝓕𝓨**.\nI'm Here to download your music.",
+    await query.message.edit(f"👋😊Hello **{query.message.from_user.first_name}**, I'm **𝓩𝓟𝓞𝓣𝓘𝓕𝓨**.\nI'm Here to download your music.",
                         reply_markup=InlineKeyboardMarkup(button))     
     
 @Mbot.on_callback_query(filters.regex(r"help_(.*?)"))
@@ -285,7 +360,7 @@ async def help_home(_, query):
         [InlineKeyboardButton(text=i, callback_data=f"help_{i}")] for i in HELP
     ]
     button.append([InlineKeyboardButton(text="❌", callback_data="close")])
-    await query.message.edit(f"Hello **{query.from_user.first_name}**, I'm **𝓩𝓟𝓞𝓣𝓘𝓕𝓨**.\nI'm Here to download your music.",
+    await query.message.edit(f"👋😊Hello **{query.from_user.first_name}**, I'm **𝓩𝓟𝓞𝓣𝓘𝓕𝓨**.\nI'm Here to download your music.",
                         reply_markup=InlineKeyboardMarkup(button))
 
 @Mbot.on_callback_query(filters.regex(r"close"))
