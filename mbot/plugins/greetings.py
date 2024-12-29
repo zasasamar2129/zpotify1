@@ -47,13 +47,13 @@ async def restart(_, message):
     
     keyboard = [
         [
-            InlineKeyboardButton("🫡 Yes", callback_data="restart_yes"),
-            InlineKeyboardButton("🙅‍♂️ No", callback_data="restart_no")
+            InlineKeyboardButton("🟢 Yes", callback_data="restart_yes"),
+            InlineKeyboardButton("🔴 No", callback_data="restart_no")
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await message.delete()
-    await message.reply_text("👩‍💻 Are you sure you want to restart the bot?", reply_markup=reply_markup)
+    await message.reply_text("( •᷄ᴗ•́) Are you sure you want to restart the bot?", reply_markup=reply_markup)
 
 @Mbot.on_callback_query(filters.regex(r"restart_(yes|no)"))
 async def handle_restart_query(_, callback_query):
