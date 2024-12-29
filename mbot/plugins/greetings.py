@@ -22,17 +22,17 @@ async def start(client, message):
             InlineKeyboardButton(
                 text="⛓️‍💥 Repo",
                 url="https://github.com/zasasamar2129/zpotify1"),
-            InlineKeyboardButton(text="🔍 Help", callback_data="helphome")
+            InlineKeyboardButton(text="❓Help", callback_data="helphome")
         ],
         [
-            InlineKeyboardButton(text="💵 Donate",
+            InlineKeyboardButton(text="💖 Donate",
             url="https://www.buymeacoffee.com/zasasamar"),
         ]
     ]
     
     if LOG_GROUP:
         invite_link = await client.create_chat_invite_link(chat_id=(int(LOG_GROUP) if str(LOG_GROUP).startswith("-100") else LOG_GROUP))
-        reply_markup.append([InlineKeyboardButton("📜 LOG Channel", url=invite_link.invite_link)])
+        reply_markup.append([InlineKeyboardButton("🗃️ LOG Channel", url=invite_link.invite_link)])
     
     reply_markup.append([InlineKeyboardButton(text="❌", callback_data="close")])
     
