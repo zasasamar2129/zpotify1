@@ -13,7 +13,6 @@ import json
 from mbot.utils.util import save_maintenance_status
 MAINTENANCE_FILE = "maintenance_status.json"
 BAN_LIST_FILE = "banned_users.json"
-import datetime
 ################################MAINTENANCE##################################
 # Load maintenance status
 def load_maintenance_status():
