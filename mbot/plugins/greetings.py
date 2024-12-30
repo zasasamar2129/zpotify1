@@ -10,9 +10,87 @@ import spotipy
 import psutil
 from asyncio import sleep
 import json
-
-# File to store banned users
+from mbot.utils.util import save_maintenance_status
+MAINTENANCE_FILE = "maintenance_status.json"
 BAN_LIST_FILE = "banned_users.json"
+
+################################MAINTENANCE##################################
+# Load maintenance status
+def load_maintenance_status():
+    if os.path.exists(MAINTENANCE_FILE):
+        with open(MAINTENANCE_FILE, "r") as f:
+            return json.load(f).get("maintenance", False)
+    return False
+
+# Save maintenance status
+def save_maintenance_status(status):
+    with open(MAINTENANCE_FILE, "w") as f:
+        json.dump({"maintenance": status}, f)
+
+# Global maintenance mode variable
+maintenance_mode = load_maintenance_status()
+
+# Command to toggle maintenance mode using inline buttons
+@Mbot.on_message(filters.command("maintenance") & filters.user(SUDO_USERS))
+async def maintenance_control(client, message):
+    await message.delete()
+
+    # Create inline buttons for enabling/disabling maintenance mode
+    keyboard = [
+        [
+            InlineKeyboardButton("⚠️ Enable Maintenance", callback_data="maintenance_on"),
+            InlineKeyboardButton("🟢 Disable Maintenance", callback_data="maintenance_off"),
+        ],
+        [
+            InlineKeyboardButton("🚧 Check Maintenance Status", callback_data="maintenance_status")
+        ],
+        [   
+            InlineKeyboardButton(text="❌", callback_data="close")
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await message.reply_text("🛠️ Please choose an option to enable/disable maintenance mode or check the current status:", reply_markup=reply_markup)
+
+# Handle callback queries for maintenance toggle and status check
+@Mbot.on_callback_query(filters.regex(r"maintenance_(on|off|status)"))
+async def handle_maintenance_toggle(client, callback_query):
+    action = callback_query.data.split("_")[1]  # Extract "on", "off", or "status"
+    
+    if action == "on":
+        save_maintenance_status(True)
+        await callback_query.answer("👨🏻‍🔧 Maintenance mode has been enabled.", show_alert=True)
+        await callback_query.message.edit_text("👨🏻‍🔧 Maintenance mode has been enabled. Bot will not respond to user requests")
+        await callback_query.message.delete()
+
+    elif action == "off":
+        save_maintenance_status(False)
+        await callback_query.answer("➤ Maintenance mode has been disabled.", show_alert=True)
+        await callback_query.message.edit_text("Maintenance mode has been disabled. Bot is now operational 🟢")
+        await callback_query.message.delete()
+
+    elif action == "status":
+        status = "ON" if load_maintenance_status() else "OFF"
+        await callback_query.answer(f"🚧 Maintenance mode is currently: **{status}**", show_alert=True)
+        await callback_query.message.delete()
+
+# Helper function to check maintenance mode
+def maintenance_check(handler):
+    async def wrapper(client, message):
+        # Load the latest maintenance status
+        global maintenance_mode
+        maintenance_mode = load_maintenance_status()
+        
+        if maintenance_mode and message.from_user.id not in SUDO_USERS:
+            await message.reply_text("🚧 The bot is under maintenance. Please try again later.")
+            return
+        await handler(client, message)
+    return wrapper
+
+#################################MAINTENANCE##################################
+
+
+#####################################BAN######################################
+
 
 # Load banned users from file
 def load_banned_users():
@@ -48,7 +126,7 @@ async def ban_user(client, message):
     # Add the user to the ban list
     banned_users.add(user_id)
     save_banned_users(banned_users)  # Pass the updated banned_users set
-    await message.reply_text(f"User {user_id} has been banned successfully 💀.")
+    await message.reply_text(f"User {user_id} has been banned successfully .")
 
 # Command to unban a user
 @Mbot.on_message(filters.command("unban") & filters.user(SUDO_USERS))
@@ -81,12 +159,50 @@ async def view_ban_list(client, message):
         ban_list = "\n".join(str(user_id) for user_id in banned_users)
         await message.reply_text(f"Banned users:\n{ban_list}")
 
-# Modify existing commands to check if a user is banned
+#####################################BAN######################################
+
+######################################SHUTDOWN################################
+@Mbot.on_message(filters.command("shutdown") & filters.chat(OWNER_ID) & filters.private)
+async def shutdown(_, message):
+    await message.delete()
+
+    keyboard = [
+        [
+            InlineKeyboardButton("🟢 Yes", callback_data="shutdown_yes"),
+            InlineKeyboardButton("🔴 No", callback_data="shutdown_no")
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await message.reply_text("( •᷄ᴗ•́) Are you sure you want to shut down the bot?", reply_markup=reply_markup)
+
+@Mbot.on_callback_query(filters.regex(r"shutdown_(yes|no)"))
+async def handle_shutdown_query(_, callback_query):
+    if callback_query.data == "shutdown_yes":
+        await callback_query.message.delete()
+        await callback_query.answer("🔌Shutting down bot...", show_alert=True)
+
+        # Shutdown the bot by stopping the event loop
+        await os._exit(0)
+
+    
+
+    elif callback_query.data == "shutdown_no":
+        await callback_query.answer("Bot shutdown has been cancelled.", show_alert=True)
+        await callback_query.message.delete()
+
+
+@Mbot.on_message(filters.command("settings"))
+@maintenance_check
+async def settings(client, message):
+    await message.delete()
+    await message.reply_text("🔜 We will add this feature. Stay tuned @Zpotify1(News)")
+
 @Mbot.on_message(filters.command("start"))
+@maintenance_check
 async def start(client, message):
     await message.delete()
     if message.from_user.id in banned_users:
-        await message.reply_text("You are banned from using this bot 💀.")
+        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) .")
         return
     await message.delete()
     reply_markup = [
@@ -116,7 +232,8 @@ async def start(client, message):
 ############################RESTART######################################
 @Mbot.on_message(filters.command("restart") & filters.chat(OWNER_ID) & filters.private)
 async def restart(_, message):
-    
+    await message.delete()
+
     keyboard = [
         [
             InlineKeyboardButton("🟢 Yes", callback_data="restart_yes"),
@@ -132,6 +249,7 @@ async def handle_restart_query(_, callback_query):
     if callback_query.data == "restart_yes":
         await callback_query.message.delete()
         await callback_query.answer("Restarting bot...", show_alert=True)
+        
         execvp(sys.executable, [sys.executable, "-m", "mbot"])
     elif callback_query.data == "restart_no":
         await callback_query.answer("Bot restart has been cancelled.", show_alert=True)
@@ -150,9 +268,10 @@ async def cpu_usage(_, message):
     await message.reply_text(f"**CPU Usage:** `{cpu_percent}%`")
 
 @Mbot.on_message(filters.command("ping"))
+@maintenance_check
 async def ping(client, message):
     if message.from_user.id in banned_users:
-        await message.reply_text("You are banned from using this bot.")
+        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) .")
         return
     start = datetime.now()
     await client.invoke(Ping(ping_id=0))
@@ -160,9 +279,10 @@ async def ping(client, message):
     await message.reply_text(f"**Pong!**\nResponse time: `{ms} ms`")
 
 @Mbot.on_message(filters.command("donate"))
+@maintenance_check
 async def donate(_, message):
     if message.from_user.id in banned_users:
-        await message.reply_text("You are banned from using this bot.")
+        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) .")
         return
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Donate", url="https://www.buymeacoffee.com/zasasamar")],
@@ -171,9 +291,10 @@ async def donate(_, message):
     await message.reply_text("If you would like to support the development of this bot, you can donate here:", reply_markup=keyboard)
 
 @Mbot.on_message(filters.command("info"))
+@maintenance_check
 async def info(_, message):
     if message.from_user.id in banned_users:
-        await message.reply_text("You are banned from using this bot.")
+        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) .")
         return
     info_text = (
     "💢 **Hello! I am 𝓩𝓟𝓞𝓣𝓘𝓕𝓨** 💢\n\n"
@@ -208,9 +329,10 @@ async def info(_, message):
     await message.reply_text(info_text)
 
 @Mbot.on_message(filters.command("stats"))
+@maintenance_check
 async def stats(client, message):
     if message.from_user.id in banned_users:
-        await message.reply_text("You are banned from using this bot.")
+        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) .")
         return
     # Initial reply with a placeholder message
     fetching_message = await message.reply_text("Fetching stats...\n[                    ] 0%")
@@ -324,9 +446,10 @@ HELP = {
 }
 
 @Mbot.on_message(filters.command("help"))
+@maintenance_check
 async def help(_, message):
     if message.from_user.id in banned_users:
-        await message.reply_text("You are banned from using this bot.")
+        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) .")
         return
     await message.delete()
     button = [
