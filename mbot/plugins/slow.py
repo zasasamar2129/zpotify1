@@ -2,6 +2,8 @@ from pyrogram.errors import FloodWait, Forbidden, UserIsBlocked, MessageNotModif
 from datetime import datetime
 import time
 import spotipy
+from mbot.utils.util import is_maintenance_mode
+from mbot import LOG_GROUP, OWNER_ID, SUDO_USERS, Mbot, AUTH_CHATS
 from sys import executable
 # from Script import script
 import psutil, shutil
@@ -39,6 +41,18 @@ from mutagen import File
 from mutagen.flac import FLAC, Picture
 from lyricsgenius import Genius
 # from database.database import Database
+import json
+import os
+##Load banned users from file######
+BAN_LIST_FILE = "banned_users.json"
+# Load banned users from file
+def load_banned_users():
+    if os.path.exists(BAN_LIST_FILE):
+        with open(BAN_LIST_FILE, "r") as f:
+            return set(json.load(f))
+    return set()
+banned_users = load_banned_users()
+####################################
 
 supported_link = ["www.deezer.com", "open.spotify.com", "deezer.com", "spotify.com"]
 
@@ -66,8 +80,10 @@ genius = Genius("api_key")
 ##  & filters.private add this to respond only in private Chat
 @Mbot.on_message(filters.incoming & filters.text, group=-3)
 async def _(c, m):
+
     message = m
     Mbot = c
+
     try:
         user_id = message.from_user.id
     except:
@@ -99,6 +115,16 @@ async def _(c, m):
     elif int(message.chat.id) in NO_SPAM:
         return
     u = message.from_user.id
+    
+    if is_maintenance_mode() and message.from_user.id not in SUDO_USERS:
+        await message.reply_text("🔧 The bot is under maintenance. Please try again later.")
+        return
+
+    # Check Banned Users
+    if message.from_user.id in banned_users:
+        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) ")
+        return
+
     K = await message.reply("⌛")
     query = m.text
     reply_markup = []

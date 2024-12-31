@@ -27,13 +27,35 @@ from deezer import Client
 from os import mkdir
 from random import randint
 from mbot.utils.mainhelper import fetch_tracks,download_dez,parse_deezer_url,thumb_down
-
-
+from mbot.utils.util import is_maintenance_mode
+import json
+import os
+from mbot import LOG_GROUP, OWNER_ID, SUDO_USERS, Mbot, AUTH_CHATS
+##Load banned users from file######
+BAN_LIST_FILE = "banned_users.json"
+# Load banned users from file
+def load_banned_users():
+    if os.path.exists(BAN_LIST_FILE):
+        with open(BAN_LIST_FILE, "r") as f:
+            return set(json.load(f))
+    return set()
+banned_users = load_banned_users()
+####################################
 client = Client()
 
 
 @Mbot.on_message(filters.regex(r'https?://.*deezer[^\s]+') & filters.private | filters.regex(r'https?://.*deezer[^\s]+') & filters.command("deezer") & filters.chat(AUTH_CHATS))
 async def link_handler(_, message):
+
+    if is_maintenance_mode() and message.from_user.id not in SUDO_USERS:
+        await message.reply_text("🔧 The bot is under maintenance. Please try again later.")
+        return
+    
+    # Check Banned Users
+    if message.from_user.id in banned_users:
+        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) ")
+        return
+
     link = message.matches[0].group(0)
     try:
         items = await parse_deezer_url(link)

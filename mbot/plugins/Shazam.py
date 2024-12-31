@@ -1,11 +1,14 @@
 from __future__ import unicode_literals
 from pyrogram import Client , filters 
 from os import environ,execl
+from datetime import datetime
 from sys import executable
 from pyrogram.errors import FloodWait 
 from pyrogram.types import Message , InlineKeyboardMarkup, InlineKeyboardButton ,CallbackQuery
 from pyrogram.errors import FloodWait 
 from asyncio import sleep
+from mbot.utils.util import is_maintenance_mode
+from mbot import LOG_GROUP, OWNER_ID, SUDO_USERS, Mbot, AUTH_CHATS
 #from database.users_chats_db import db
 #from utils import get_size
 from shazamio import Shazam
@@ -15,7 +18,7 @@ import time
 #import shlex
 #import aiofiles
 #import aiohttp
-#import wget
+import wget
 import os
 #from asgiref.sync import sync_to_async
 from requests import get
@@ -40,6 +43,18 @@ from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
 from apscheduler.schedulers.background import BackgroundScheduler
 from mbot.utils.shazam import humanbytes, edit_or_reply, fetch_audio
+import json
+import os
+##Load banned users from file######
+BAN_LIST_FILE = "banned_users.json"
+# Load banned users from file
+def load_banned_users():
+    if os.path.exists(BAN_LIST_FILE):
+        with open(BAN_LIST_FILE, "r") as f:
+            return set(json.load(f))
+    return set()
+banned_users = load_banned_users()
+####################################
 NOT_SUPPORT = [ ]
 ADMINS = 5337964165
 def get_arg(message):
@@ -85,6 +100,16 @@ async def convert_to_audio(vid_path):
 
 @Client.on_message(filters.command(["find", "shazam"] ))
 async def shazam_(client, message):
+
+    if is_maintenance_mode() and message.from_user.id not in SUDO_USERS:
+        await message.reply_text("🔧 The bot is under maintenance. Please try again later.")
+        return
+    
+    # Check Banned Users
+    if message.from_user.id in banned_users:
+        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) ")
+        return
+    
     stime = getime.time()
     sts=await message.reply_sticker("CAACAgIAAxkBATWhF2Qz1Y-FKIKqlw88oYgN8N82FtC8AAJnAAPb234AAT3fFO9hR5GfHgQ")
     msg = await message.reply_text("`Shazaming This Song.")
