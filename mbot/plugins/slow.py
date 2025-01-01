@@ -103,8 +103,7 @@ async def _(c, m):
         await m.reply_text("⚠️ You are already engaged in a task. Please wait for it to finish or cancel it with `/cancel`.")
         return
 
-    # Set focus for the user
-    set_focus(user_id)
+    
 
     try:
         if not m.text or m.text.startswith(('/', 'https:', 'http:', ',', '.', '🎧')):

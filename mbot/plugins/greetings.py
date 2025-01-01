@@ -524,7 +524,6 @@ async def admin_panel(client, message):
             InlineKeyboardButton("🛠️ Maintenance", callback_data="maintenance_management"),
         ],
         [
-            InlineKeyboardButton("📢 Broadcast Message", callback_data="broadcast_management"),
             InlineKeyboardButton("📊 Stats", callback_data="stats_management"),
         ],
         [
@@ -571,20 +570,6 @@ async def maintenance_management_panel(client, callback_query):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await callback_query.message.edit_text("🛠️ Maintenance Management:\nChoose an action:", reply_markup=reply_markup)
 
-@Mbot.on_callback_query(filters.regex(r"broadcast_management"))
-async def broadcast_management_panel(client, callback_query):
-    await callback_query.answer()
-    
-    await callback_query.message.edit_text("📢 Send your broadcast message below:")
-    
-    # Wait for the next message from the user
-    @Mbot.on_message(filters.user(SUDO_USERS))
-    async def handle_broadcast_message(client, message):
-        if message.text:
-            await broadcast_message(client, message)
-            await message.reply_text("📢 Broadcast message sent to all users.")
-            return
-        await message.reply_text("ℹ️ Please send a valid message.")
 
 @Mbot.on_callback_query(filters.regex(r"stats_management"))
 async def stats_management_panel(client, callback_query):
@@ -626,7 +611,6 @@ async def admin_panel(client, message):
             InlineKeyboardButton("🛠️ Maintenance", callback_data="maintenance_management"),
         ],
         [
-            InlineKeyboardButton("📢 Broadcast Message", callback_data="broadcast_management"),
             InlineKeyboardButton("📊 Stats", callback_data="stats_management"),
         ],
         [
@@ -682,88 +666,6 @@ async def cpu_usage_callback(client, callback_query):
     await callback_query.answer()
     await cpu_usage(client, callback_query.message)  # Call the existing cpu_usage function
 
-broadcast_states = {}
-
-@Mbot.on_callback_query(filters.regex(r"broadcast_management"))
-async def broadcast_management_panel(client, callback_query):
-    user_id = callback_query.from_user.id
-    broadcast_states[user_id] = True  # Set broadcast mode for the user
-
-    await callback_query.answer()
-    await callback_query.message.edit_text(
-        "📢 Send the broadcast message below or type /cancel to exit.\n"
-        "All other actions will be ignored until this task is completed."
-    )
-
-
-@Mbot.on_message(filters.user(SUDO_USERS))
-async def handle_broadcast_message(client, message):
-    user_id = message.from_user.id
-
-    # If the user is not in broadcast mode, ignore this handler
-    if broadcast_states.get(user_id) is not True:
-        return
-
-    # Handle cancellation
-    if message.text.lower() == "/cancel":
-        broadcast_states[user_id] = False  # Exit broadcast mode
-        await message.reply_text("❌ Broadcast canceled.")
-        return
-
-    # Handle the broadcast message
-    if message.text:
-        await broadcast_message(client, message.text)
-        await message.reply_text("📢 Broadcast message sent to all users.")
-        broadcast_states[user_id] = False  # Exit broadcast mode
-    else:
-        await message.reply_text("ℹ️ Please send a valid message.")
-
-
-@Mbot.on_message(filters.user(SUDO_USERS))
-async def handle_broadcast_message(client, message):
-    user_id = message.from_user.id
-
-    # If the user is not in broadcast mode, ignore this handler
-    if broadcast_states.get(user_id) is not True:
-        return
-
-    # Handle cancellation
-    if message.text.lower() == "/cancel":
-        broadcast_states[user_id] = False  # Exit broadcast mode
-        await message.reply_text("❌ Broadcast canceled.")
-        return
-
-    # Handle the broadcast message
-    if message.text:
-        await broadcast_message(client, message.text)
-        await message.reply_text("📢 Broadcast message sent to all users.")
-        broadcast_states[user_id] = False  # Exit broadcast mode
-    else:
-        await message.reply_text("ℹ️ Please send a valid message.")
-
-
-@Mbot.on_message(filters.command("broadcast") & filters.user(SUDO_USERS))
-async def broadcast_message(client, message):
-    # Extract the message text to broadcast
-    if isinstance(message, str):
-        broadcast_text = message
-    else:
-        if len(message.command) < 2:
-            await message.reply_text("ℹ️ Usage: /broadcast <message>")
-            return
-        broadcast_text = " ".join(message.command[1:])
-
-    # Send the broadcast to all users
-    for user_id in user_list:
-        try:
-            await client.send_message(user_id, broadcast_text)
-        except Exception as e:
-            print(f"Failed to send message to {user_id}: {e}")
-
-    if not isinstance(message, str):
-        await message.reply_text("📢 Broadcast message sent to all users.")
-
-
 
 # Handle the restart confirmation
 @Mbot.on_callback_query(filters.regex(r"restart_(yes|no)"))
@@ -803,7 +705,6 @@ async def go_back_to_admin_panel(client, callback_query):
             InlineKeyboardButton("🛠️ Maintenance", callback_data="maintenance_management"),
         ],
         [
-            InlineKeyboardButton("📢 Broadcast Message", callback_data="broadcast_management"),
             InlineKeyboardButton("📊 Stats", callback_data="stats_management"),
         ],
         [
