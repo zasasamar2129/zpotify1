@@ -40,7 +40,6 @@ from shutil import rmtree
 from mutagen import File
 from mutagen.flac import FLAC, Picture
 from lyricsgenius import Genius
-from mbot.utils.focus_manager import set_focus, clear_focus, is_focused
 # from database.database import Database
 import json
 import os
@@ -147,11 +146,6 @@ async def _(c, m):
 @Mbot.on_callback_query(filters.regex(r"search"))
 async def search(Mbot: Mbot, query: CallbackQuery):
     user_id = query.from_user.id
-
-    if not is_focused(user_id):
-        set_focus(user_id)
-
-    
     ind, index, track = query.data.split("_")
     try:
         message = query.message

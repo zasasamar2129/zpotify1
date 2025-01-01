@@ -11,7 +11,6 @@ import psutil
 from asyncio import sleep
 import json
 from mbot.utils.util import save_maintenance_status
-from mbot.utils.focus_manager import set_focus, clear_focus, is_focused
 MAINTENANCE_FILE = "maintenance_status.json"
 BAN_LIST_FILE = "banned_users.json"
 USER_LIST_FILE = "user_list.json"
