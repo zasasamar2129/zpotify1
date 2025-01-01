@@ -11,8 +11,26 @@ import psutil
 from asyncio import sleep
 import json
 from mbot.utils.util import save_maintenance_status
+from mbot.utils.focus_manager import set_focus, clear_focus, is_focused
 MAINTENANCE_FILE = "maintenance_status.json"
 BAN_LIST_FILE = "banned_users.json"
+USER_LIST_FILE = "user_list.json"
+
+# Load user list from file
+def load_user_list():
+    if os.path.exists(USER_LIST_FILE):
+        with open(USER_LIST_FILE, "r") as f:
+            return set(json.load(f))
+    return set()
+
+# Save user list to file
+def save_user_list(user_list):
+    with open(USER_LIST_FILE, "w") as f:
+        json.dump(list(user_list), f)
+
+# List to store users
+user_list = load_user_list()
+
 ################################MAINTENANCE##################################
 # Load maintenance status
 def load_maintenance_status():
@@ -203,6 +221,11 @@ async def start(client, message):
     if message.from_user.id in banned_users:
         await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) .")
         return
+
+        # Add user to the user list
+    user_list.add(message.from_user.id)
+    save_user_list(user_list)  # Save the updated user list
+
     await message.delete()
     reply_markup = [
         [
@@ -488,3 +511,313 @@ async def help_home(_, query):
 @Mbot.on_callback_query(filters.regex(r"close"))
 async def close(_, query):
     await query.message.delete()
+
+
+################################################ Admin Panel ################################################
+@Mbot.on_message(filters.command("admin") & filters.user(SUDO_USERS))
+async def admin_panel(client, message):
+    await message.delete()
+    
+    keyboard = [
+        [
+            InlineKeyboardButton("🔨 Ban Management", callback_data="ban_management"),
+            InlineKeyboardButton("🛠️ Maintenance", callback_data="maintenance_management"),
+        ],
+        [
+            InlineKeyboardButton("📢 Broadcast Message", callback_data="broadcast_management"),
+            InlineKeyboardButton("📊 Stats", callback_data="stats_management"),
+        ],
+        [
+            InlineKeyboardButton("❌ Close", callback_data="close")
+        ]
+    ]
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await message.reply_text("👮‍♂️ Admin Panel:\nChoose a category:", reply_markup=reply_markup)
+
+@Mbot.on_callback_query(filters.regex(r"ban_management"))
+async def ban_management_panel(client, callback_query):
+    await callback_query.answer()
+    
+    keyboard = [
+        [
+            InlineKeyboardButton("🚫 Ban User", callback_data="ban_user"),
+            InlineKeyboardButton("🔓 Unban User", callback_data="unban_user"),
+        ],
+        [
+            InlineKeyboardButton("📋 View Ban List", callback_data="view_ban_list"),
+            InlineKeyboardButton("🔙 Back", callback_data="admin")
+        ]
+    ]
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await callback_query.message.edit_text("🔨 Ban Management:\nChoose an action:", reply_markup=reply_markup)
+
+@Mbot.on_callback_query(filters.regex(r"maintenance_management"))
+async def maintenance_management_panel(client, callback_query):
+    await callback_query.answer()
+    
+    keyboard = [
+        [
+            InlineKeyboardButton("⚠️ Enable Maintenance", callback_data="maintenance_on"),
+            InlineKeyboardButton("🟢 Disable Maintenance", callback_data="maintenance_off"),
+        ],
+        [
+            InlineKeyboardButton("🚧 Check Maintenance Status", callback_data="maintenance_status"),
+            InlineKeyboardButton("🔙 Back", callback_data="admin")
+        ]
+    ]
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await callback_query.message.edit_text("🛠️ Maintenance Management:\nChoose an action:", reply_markup=reply_markup)
+
+@Mbot.on_callback_query(filters.regex(r"broadcast_management"))
+async def broadcast_management_panel(client, callback_query):
+    await callback_query.answer()
+    
+    await callback_query.message.edit_text("📢 Send your broadcast message below:")
+    
+    # Wait for the next message from the user
+    @Mbot.on_message(filters.user(SUDO_USERS))
+    async def handle_broadcast_message(client, message):
+        if message.text:
+            await broadcast_message(client, message)
+            await message.reply_text("📢 Broadcast message sent to all users.")
+            return
+        await message.reply_text("ℹ️ Please send a valid message.")
+
+@Mbot.on_callback_query(filters.regex(r"stats_management"))
+async def stats_management_panel(client, callback_query):
+    await callback_query.answer()
+    await stats(client, callback_query.message)  # Call the existing stats function
+
+@Mbot.on_callback_query(filters.regex(r"close"))
+async def close(_, query):
+    await query.message.delete()
+
+@Mbot.on_callback_query(filters.regex(r"ban_user"))
+async def ban_user_callback(client, callback_query):
+    await callback_query.answer("Please reply to a user's message or send their user ID to ban.")
+    
+    @Mbot.on_message(filters.user(SUDO_USERS))
+    async def handle_ban_user(client, message):
+        await ban_user(client, message)  # Call the existing ban_user function
+
+@Mbot.on_callback_query(filters.regex(r"unban_user"))
+async def unban_user_callback(client, callback_query):
+    await callback_query.answer("Please send the user ID to unban.")
+    
+    @Mbot.on_message(filters.user(SUDO_USERS))
+    async def handle_unban_user(client, message):
+        await unban_user(client, message)  # Call the existing unban_user function
+
+@Mbot.on_callback_query(filters.regex(r"view_ban_list"))
+async def view_ban_list_callback(client, callback_query):
+    await view_ban_list(client, callback_query.message)  # Call the existing view_ban_list function
+
+
+@Mbot.on_message(filters.command("admin") & filters.user(SUDO_USERS))
+async def admin_panel(client, message):
+    await message.delete()
+    
+    keyboard = [
+        [
+            InlineKeyboardButton("🔨 Ban Management", callback_data="ban_management"),
+            InlineKeyboardButton("🛠️ Maintenance", callback_data="maintenance_management"),
+        ],
+        [
+            InlineKeyboardButton("📢 Broadcast Message", callback_data="broadcast_management"),
+            InlineKeyboardButton("📊 Stats", callback_data="stats_management"),
+        ],
+        [
+            InlineKeyboardButton("🔄 Restart Bot", callback_data="restart_bot"),
+            InlineKeyboardButton("🔌 Shutdown Bot", callback_data="shutdown_bot"),
+        ],
+        [
+            InlineKeyboardButton("📜 View Logs", callback_data="view_logs"),
+            InlineKeyboardButton("💻 CPU Usage", callback_data="cpu_usage"),
+        ],
+        [
+            InlineKeyboardButton("❌ Close", callback_data="close")
+        ]
+    ]
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await message.reply_text("👮‍♂️ Admin Panel:\nChoose a category:", reply_markup=reply_markup)
+
+# Add the new callback functions for the commands
+@Mbot.on_callback_query(filters.regex(r"restart_bot"))
+async def restart_bot_callback(client, callback_query):
+    await callback_query.answer("Are you sure you want to restart the bot?")
+    
+    keyboard = [
+        [
+            InlineKeyboardButton("🟢 Yes", callback_data="restart_yes"),
+            InlineKeyboardButton("🔴 No", callback_data="restart_no")
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await callback_query.message.edit_text("🔄 Restarting the bot...", reply_markup=reply_markup)
+
+@Mbot.on_callback_query(filters.regex(r"shutdown_bot"))
+async def shutdown_bot_callback(client, callback_query):
+    await callback_query.answer("Are you sure you want to shut down the bot?")
+    
+    keyboard = [
+        [
+            InlineKeyboardButton("🟢 Yes", callback_data="shutdown_yes"),
+            InlineKeyboardButton("🔴 No", callback_data="shutdown_no")
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await callback_query.message.edit_text("🔌 Shutting down the bot...", reply_markup=reply_markup)
+
+@Mbot.on_callback_query(filters.regex(r"view_logs"))
+async def view_logs_callback(client, callback_query):
+    await callback_query.answer()
+    await send_log(client, callback_query.message)  # Call the existing send_log function
+
+@Mbot.on_callback_query(filters.regex(r"cpu_usage"))
+async def cpu_usage_callback(client, callback_query):
+    await callback_query.answer()
+    await cpu_usage(client, callback_query.message)  # Call the existing cpu_usage function
+
+broadcast_states = {}
+
+@Mbot.on_callback_query(filters.regex(r"broadcast_management"))
+async def broadcast_management_panel(client, callback_query):
+    user_id = callback_query.from_user.id
+    broadcast_states[user_id] = True  # Set broadcast mode for the user
+
+    await callback_query.answer()
+    await callback_query.message.edit_text(
+        "📢 Send the broadcast message below or type /cancel to exit.\n"
+        "All other actions will be ignored until this task is completed."
+    )
+
+
+@Mbot.on_message(filters.user(SUDO_USERS))
+async def handle_broadcast_message(client, message):
+    user_id = message.from_user.id
+
+    # If the user is not in broadcast mode, ignore this handler
+    if broadcast_states.get(user_id) is not True:
+        return
+
+    # Handle cancellation
+    if message.text.lower() == "/cancel":
+        broadcast_states[user_id] = False  # Exit broadcast mode
+        await message.reply_text("❌ Broadcast canceled.")
+        return
+
+    # Handle the broadcast message
+    if message.text:
+        await broadcast_message(client, message.text)
+        await message.reply_text("📢 Broadcast message sent to all users.")
+        broadcast_states[user_id] = False  # Exit broadcast mode
+    else:
+        await message.reply_text("ℹ️ Please send a valid message.")
+
+
+@Mbot.on_message(filters.user(SUDO_USERS))
+async def handle_broadcast_message(client, message):
+    user_id = message.from_user.id
+
+    # If the user is not in broadcast mode, ignore this handler
+    if broadcast_states.get(user_id) is not True:
+        return
+
+    # Handle cancellation
+    if message.text.lower() == "/cancel":
+        broadcast_states[user_id] = False  # Exit broadcast mode
+        await message.reply_text("❌ Broadcast canceled.")
+        return
+
+    # Handle the broadcast message
+    if message.text:
+        await broadcast_message(client, message.text)
+        await message.reply_text("📢 Broadcast message sent to all users.")
+        broadcast_states[user_id] = False  # Exit broadcast mode
+    else:
+        await message.reply_text("ℹ️ Please send a valid message.")
+
+
+@Mbot.on_message(filters.command("broadcast") & filters.user(SUDO_USERS))
+async def broadcast_message(client, message):
+    # Extract the message text to broadcast
+    if isinstance(message, str):
+        broadcast_text = message
+    else:
+        if len(message.command) < 2:
+            await message.reply_text("ℹ️ Usage: /broadcast <message>")
+            return
+        broadcast_text = " ".join(message.command[1:])
+
+    # Send the broadcast to all users
+    for user_id in user_list:
+        try:
+            await client.send_message(user_id, broadcast_text)
+        except Exception as e:
+            print(f"Failed to send message to {user_id}: {e}")
+
+    if not isinstance(message, str):
+        await message.reply_text("📢 Broadcast message sent to all users.")
+
+
+
+# Handle the restart confirmation
+@Mbot.on_callback_query(filters.regex(r"restart_(yes|no)"))
+async def handle_restart_query(_, callback_query):
+    if callback_query.data == "restart_yes":
+        await callback_query.message.delete()
+        await callback_query.answer("Restarting bot...", show_alert=True)
+        
+        execvp(sys.executable, [sys.executable, "-m", "mbot"])
+    elif callback_query.data == "restart_no":
+        await callback_query.answer("Bot restart has been cancelled.", show_alert=True)
+        await callback_query.message.delete()
+
+# Handle the shutdown confirmation
+@Mbot.on_callback_query(filters.regex(r"shutdown_(yes|no)"))
+async def handle_shutdown_query(_, callback_query):
+    if callback_query.data == "shutdown_yes":
+        await callback_query.message.delete()
+        await callback_query.answer("🔌 Shutting down bot...", show_alert=True)
+
+        # Shutdown the bot by stopping the event loop
+        await os._exit(0)
+    elif callback_query.data == "shutdown_no":
+        await callback_query.answer("Bot shutdown has been cancelled.", show_alert=True)
+        await callback_query.message.delete()
+
+
+
+#################################################################################################
+@Mbot.on_callback_query(filters.regex(r"admin"))
+async def go_back_to_admin_panel(client, callback_query):
+    await callback_query.answer()
+    
+    keyboard = [
+        [
+            InlineKeyboardButton("🔨 Ban Management", callback_data="ban_management"),
+            InlineKeyboardButton("🛠️ Maintenance", callback_data="maintenance_management"),
+        ],
+        [
+            InlineKeyboardButton("📢 Broadcast Message", callback_data="broadcast_management"),
+            InlineKeyboardButton("📊 Stats", callback_data="stats_management"),
+        ],
+        [
+            InlineKeyboardButton("🔄 Restart Bot", callback_data="restart_bot"),
+            InlineKeyboardButton("🔌 Shutdown Bot", callback_data="shutdown_bot"),
+        ],
+        [
+            InlineKeyboardButton("📜 View Logs", callback_data="view_logs"),
+            InlineKeyboardButton("💻 CPU Usage", callback_data="cpu_usage"),
+        ],
+        [
+            InlineKeyboardButton("❌ Close", callback_data="close")
+        ]
+    ]
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await callback_query.message.edit_text("👮‍♂️ Admin Panel:\nChoose a category:", reply_markup=reply_markup)

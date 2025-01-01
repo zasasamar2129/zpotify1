@@ -40,9 +40,14 @@ from shutil import rmtree
 from mutagen import File
 from mutagen.flac import FLAC, Picture
 from lyricsgenius import Genius
+from mbot.utils.focus_manager import set_focus, clear_focus, is_focused
 # from database.database import Database
 import json
 import os
+#############################
+
+
+
 ##Load banned users from file######
 BAN_LIST_FILE = "banned_users.json"
 # Load banned users from file
@@ -77,76 +82,77 @@ genius = Genius("api_key")
 # async def __(c, m):
 #     await foo(c, m, cb=True)
 
+
+@Mbot.on_message(filters.command("cancel") & filters.user(SUDO_USERS))
+async def cancel_task(client, message):
+    user_id = message.from_user.id
+
+    if is_focused(user_id):
+        clear_focus(user_id)
+        await message.reply_text("❌ Current task canceled.")
+    else:
+        await message.reply_text("ℹ️ No active tasks to cancel.")
+
 ##  & filters.private add this to respond only in private Chat
 @Mbot.on_message(filters.incoming & filters.text, group=-3)
 async def _(c, m):
+    user_id = m.from_user.id
 
-    message = m
-    Mbot = c
+    # Check if user is already focused
+    if is_focused(user_id):
+        await m.reply_text("⚠️ You are already engaged in a task. Please wait for it to finish or cancel it with `/cancel`.")
+        return
+
+    # Set focus for the user
+    set_focus(user_id)
 
     try:
-        user_id = message.from_user.id
-    except:
-        user_id = 5337964165
-    if not m.text:
-        return
-    try:
-        if F_SUB and F_SUB_CHANNEL_ID:
-            if not str(F_SUB_CHANNEL_ID).startswith("-100"):
-               print(f"Skiping F_Sub as Your Id Must Start With -100 We Got {F_SUB_CHANNEL_ID}")
-            else:
-               await Fsub(message, Mbot, user_id)
-    except (StopPropagation, ChatWriteForbidden):
-        raise StopPropagation
-    if message.text.startswith('/'):
-        return
-    elif message.text.startswith('https:'):
-        return
-    elif message.text.startswith('http:'):
-        return
-    elif message.text.startswith(','):
-        return
-    elif message.text.startswith('.'):
-        return
-    elif message.text.startswith('🎧'):
-        return
-    elif int(message.chat.id) in NOT_SUPPORT:
-        return
-    elif int(message.chat.id) in NO_SPAM:
-        return
-    u = message.from_user.id
-    
-    if is_maintenance_mode() and message.from_user.id not in SUDO_USERS:
-        await message.reply_text("🔧 The bot is under maintenance. Please try again later.")
-        return
+        if not m.text or m.text.startswith(('/', 'https:', 'http:', ',', '.', '🎧')):
+            return
 
-    # Check Banned Users
-    if message.from_user.id in banned_users:
-        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) ")
-        return
+        if int(m.chat.id) in NOT_SUPPORT or int(m.chat.id) in NO_SPAM:
+            return
 
-    K = await message.reply("⌛")
-    query = m.text
-    reply_markup = []
-    try:
+        if is_maintenance_mode() and user_id not in SUDO_USERS:
+            await m.reply_text("🔧 The bot is under maintenance. Please try again later.")
+            return
+
+        # Check Banned Users
+        if user_id in banned_users:
+            await m.reply_text("You are banned from using this bot. 😔")
+            return
+
+        query = m.text
+        reply_markup = []
         results = sp.search(query, limit=10)
-        index = 0
-        for item in results['tracks']['items']:
-            reply_markup.append([InlineKeyboardButton(f"{item['name']} - {item['artists'][0]['name']}", callback_data=f"search_{index}_{results['tracks']['items'][int(index)]['id']}")])
-            index += 1
+
+        if not results['tracks']['items']:
+            await m.reply(f"No results found for '{query}'")
+            return
+
+        for index, item in enumerate(results['tracks']['items']):
+            reply_markup.append(
+                [InlineKeyboardButton(f"{item['name']} - {item['artists'][0]['name']}", callback_data=f"search_{index}_{item['id']}")]
+            )
+
         reply_markup.append([InlineKeyboardButton("❌", callback_data="cancel")])
-        await K.delete()
-        await message.reply(f"🔎I Found 10 Results For {query}",
-                            reply_markup=InlineKeyboardMarkup(reply_markup))
-    except:
-        pass
-        await message.reply(f"No results found for your {query}")
-        await K.delete()
+        await m.reply(f"🔎 Found 10 results for '{query}'", reply_markup=InlineKeyboardMarkup(reply_markup))
+    except Exception as e:
+        await m.reply(f"An error occurred: {str(e)}")
     finally:
+        # Clear focus after processing
+        clear_focus(user_id)
         await m.continue_propagation()
+        
 
 @Mbot.on_callback_query(filters.regex(r"search"))
 async def search(Mbot: Mbot, query: CallbackQuery):
+    user_id = query.from_user.id
+
+    if not is_focused(user_id):
+        set_focus(user_id)
+
+    
     ind, index, track = query.data.split("_")
     try:
         message = query.message
@@ -241,6 +247,9 @@ async def search(Mbot: Mbot, query: CallbackQuery):
         await query.answer("Sorry, We Are Unable To Procced It 🤕❣️")
     #   await Mbot.send_message(BUG,f"Query Raised Erorr {e} On {query.message.chat.id} {query.message.from_user.mention}")
     finally: 
+        
+        clear_focus(user_id)
+
         await sleep(2.0)
         try:
             rmtree(randomdir)
@@ -293,3 +302,4 @@ async def refresh(Mbot, query):
       for var in list(locals()):
         if var != '__name__' and var != '__doc__':
             del locals()[var]
+    
