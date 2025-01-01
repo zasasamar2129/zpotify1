@@ -7,9 +7,23 @@ from random import randint
 from yt_dlp import YoutubeDL
 from spotipy.oauth2 import SpotifyClientCredentials
 import spotipy
+from mbot.utils.util import is_maintenance_mode
+from mbot import LOG_GROUP, OWNER_ID, SUDO_USERS, Mbot, AUTH_CHATS
 import os
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from mbot.utils.mainhelper import fetch_spotify_track
+import json
+import os
+##Load banned users from file######
+BAN_LIST_FILE = "banned_users.json"
+# Load banned users from file
+def load_banned_users():
+    if os.path.exists(BAN_LIST_FILE):
+        with open(BAN_LIST_FILE, "r") as f:
+            return set(json.load(f))
+    return set()
+banned_users = load_banned_users()
+####################################
 client_credentials_manager = SpotifyClientCredentials()
 client = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 async def get_data(query):
@@ -52,6 +66,16 @@ async def down_data(item,query):
 
 @Mbot.on_message(filters.regex(r'https?://.*soundcloud[^\s]+'))
 async def link_handler(Mbot, message):
+
+    if is_maintenance_mode() and message.from_user.id not in SUDO_USERS:
+        await message.reply_text("🔧 The bot is under maintenance. Please try again later.")
+        return
+    
+    # Check Banned Users
+    if message.from_user.id in banned_users:
+        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) ")
+        return
+
     try:
       # if message.from_user.id in temp.BANNED_USERS:
        #   return

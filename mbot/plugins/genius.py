@@ -4,12 +4,35 @@ from mbot import Mbot,genius_api
 import requests 
 from lyricsgenius import Genius 
 import os
-
+from mbot.utils.util import is_maintenance_mode
+from mbot import LOG_GROUP, OWNER_ID, SUDO_USERS, Mbot, AUTH_CHATS
+import json
+import os
+##Load banned users from file######
+BAN_LIST_FILE = "banned_users.json"
+# Load banned users from file
+def load_banned_users():
+    if os.path.exists(BAN_LIST_FILE):
+        with open(BAN_LIST_FILE, "r") as f:
+            return set(json.load(f))
+    return set()
+banned_users = load_banned_users()
+####################################
 
 API = "https://apis.xditya.me/lyrics?song="
 
 @Mbot.on_message(filters.text & filters.command(["genius"]) & filters.private)
 async def sng(bot, message):  
+          
+          if is_maintenance_mode() and message.from_user.id not in SUDO_USERS:
+            await message.reply_text("🔧 The bot is under maintenance. Please try again later.")
+            return
+          
+        # Check Banned Users
+          if message.from_user.id in banned_users:
+            await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) ")
+            return
+
           genius = Genius(genius_api)        
           mee = await message.reply_text("`Searching`")
           try:

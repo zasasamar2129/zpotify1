@@ -47,6 +47,7 @@ from pyrogram.errors.rpc_error import RPCError
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram import Client, filters
 #import psutil
+from mbot import LOG_GROUP, OWNER_ID, SUDO_USERS, Mbot, AUTH_CHATS
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.errors.exceptions.bad_request_400 import MessageTooLong, PeerIdInvalid
 #from info import  ADMINS, LOG_CHANNEL, SUPPORT_CHAT, MELCOW_NEW_USERS
@@ -54,6 +55,8 @@ from pyrogram.errors.exceptions.bad_request_400 import MessageTooLong, PeerIdInv
 #from database.ia_filterdb import Media
 #from utils import temp
 #from Script import script
+import json
+import os
 from pyrogram.errors import ChatAdminRequired
 from mbot import BUG
 from requests import head
@@ -67,8 +70,34 @@ LOG_TEXT_P = """
 ID - <code>{}</code>
 Name - {}
 """
+##Load banned users from file######
+BAN_LIST_FILE = "banned_users.json"
+# Load banned users from file
+def load_banned_users():
+    if os.path.exists(BAN_LIST_FILE):
+        with open(BAN_LIST_FILE, "r") as f:
+            return set(json.load(f))
+    return set()
+banned_users = load_banned_users()
+####################################
+from mbot.utils.util import is_maintenance_mode
+
+
+
+
 @Mbot.on_message(filters.incoming & filters.regex(r'https?://open.spotify.com[^\s]+') | filters.incoming & filters.regex(r'https?://spotify.link[^\s]+'), group=-1)
 async def spotify_dl(Mbot,message: Message):
+    
+    # Check maintenance mode
+    if is_maintenance_mode() and message.from_user.id not in SUDO_USERS:
+        await message.reply_text("🔧 The bot is under maintenance. Please try again later.")
+        return
+
+    # Check Banned Users
+    if message.from_user.id in banned_users:
+        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) ")
+        return
+     
     if MAIN:
        await message.reply_text(f"Bot Is Under Maintenance ⚠️")
        return
@@ -138,7 +167,7 @@ async def spotify_dl(Mbot,message: Message):
     randomdir = f"/tmp/{str(randint(1,100000000))}"
     mkdir(randomdir)
     try:
-        m = await message.reply_text(f"⏳")
+        m = await message.reply_sticker("CAACAgIAAxkBATWhF2Qz1Y-FKIKqlw88oYgN8N82FtC8AAJnAAPb234AAT3fFO9hR5GfHgQ")
         await message.reply_chat_action(enums.ChatAction.TYPING)
     except ChatWriteForbidden:
         pass

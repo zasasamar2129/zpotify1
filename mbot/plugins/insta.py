@@ -3,6 +3,21 @@ import bs4, requests,re
 import wget,os,traceback,asyncio
 import time
 from mbot import LOG_GROUP as DUMP_GROUP,BUG as LOG_GROUP
+from mbot.utils.util import is_maintenance_mode
+from mbot import LOG_GROUP, OWNER_ID, SUDO_USERS, Mbot, AUTH_CHATS
+import json
+import os
+##Load banned users from file######
+BAN_LIST_FILE = "banned_users.json"
+# Load banned users from file
+def load_banned_users():
+    if os.path.exists(BAN_LIST_FILE):
+        with open(BAN_LIST_FILE, "r") as f:
+            return set(json.load(f))
+    return set()
+banned_users = load_banned_users()
+####################################
+
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:105.0) Gecko/20100101 Firefox/105.0",
     "Accept": "*/*",
@@ -17,6 +32,16 @@ headers = {
 }
 @Mbot.on_message(filters.regex(r'https?://.*instagram[^\s]+') & filters.incoming)
 async def link_handler(Mbot, message):
+
+    if is_maintenance_mode() and message.from_user.id not in SUDO_USERS:
+        await message.reply_text("🔧 The bot is under maintenance. Please try again later.")
+        return
+    
+    # Check Banned Users
+    if message.from_user.id in banned_users:
+        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) ")
+        return
+    
     link = message.matches[0].group(0)
     try:
         m = await message.reply_sticker("CAACAgIAAxkBATWhF2Qz1Y-FKIKqlw88oYgN8N82FtC8AAJnAAPb234AAT3fFO9hR5GfHgQ")
