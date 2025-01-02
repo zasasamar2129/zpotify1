@@ -218,37 +218,43 @@ async def settings(client, message):
 async def start(client, message):
     await message.delete()
     if message.from_user.id in banned_users:
-        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) .")
+        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ).")
         return
 
-        # Add user to the user list
+    # Add user to the user list
     user_list.add(message.from_user.id)
     save_user_list(user_list)  # Save the updated user list
 
-    await message.delete()
     reply_markup = [
         [
             InlineKeyboardButton(
-                text=" 🌐 Bot Channel", url="https://t.me/Zpotify1"),
+                text="🌐 Bot Channel", url="https://t.me/Zpotify1"),
             InlineKeyboardButton(
                 text="⛓️‍💥 Repo",
                 url="https://github.com/zasasamar2129/zpotify1"),
             InlineKeyboardButton(text="❓Help", callback_data="helphome")
         ],
         [
-            InlineKeyboardButton(text="💖 Donate",
-            url="https://www.buymeacoffee.com/zasasamar"),
-        ]
+            InlineKeyboardButton(
+                text="💖 Donate", url="https://www.buymeacoffee.com/zasasamar"),
+        ],
+        [
+            InlineKeyboardButton(
+                text="📢 Support", url="https://t.me/itachi2129"),  # Replace 'SupportChannel' with your support channel username or link
+        ],
     ]
-    
+
     if LOG_GROUP:
         invite_link = await client.create_chat_invite_link(chat_id=(int(LOG_GROUP) if str(LOG_GROUP).startswith("-100") else LOG_GROUP))
         reply_markup.append([InlineKeyboardButton("🗃️ LOG Channel", url=invite_link.invite_link)])
     
-    reply_markup.append([InlineKeyboardButton(text="❌", callback_data="close")])
+    #reply_markup.append([InlineKeyboardButton(text="❌", callback_data="close")])
     
-    return await message.reply_text(f"👋 Hello {message.from_user.first_name}, I'm  𝓩𝓟𝓞𝓣𝓘𝓕𝓨. a music downloader bot that supports Download from Youtube,Spotify,Soundcloud,Deezer and more.",
-                    reply_markup=InlineKeyboardMarkup(reply_markup))
+    return await message.reply_text(
+        f"👋 Hello {message.from_user.first_name}, I'm 𝓩𝓟𝓞𝓣𝓘𝓕𝓨, a music downloader bot that supports downloading from YouTube, Spotify, SoundCloud, Deezer, and more.",
+        reply_markup=InlineKeyboardMarkup(reply_markup)
+    )
+
 
 ############################RESTART######################################
 @Mbot.on_message(filters.command("restart") & filters.chat(OWNER_ID) & filters.private)
@@ -503,7 +509,7 @@ async def help_home(_, query):
     button = [
         [InlineKeyboardButton(text=i, callback_data=f"help_{i}")] for i in HELP
     ]
-    button.append([InlineKeyboardButton(text="❌", callback_data="close")])
+    button.append([InlineKeyboardButton("❌ Close", callback_data="close")])
     await query.message.edit(f"👋😊Hello **{query.from_user.first_name}**, I'm **𝓩𝓟𝓞𝓣𝓘𝓕𝓨**.\nI'm Here to download your music.",
                         reply_markup=InlineKeyboardMarkup(button))
 
@@ -519,11 +525,12 @@ async def admin_panel(client, message):
     
     keyboard = [
         [
-            InlineKeyboardButton("🔨 Ban Management", callback_data="ban_management"),
+            InlineKeyboardButton("🛑 Ban Management", callback_data="ban_management"),
             InlineKeyboardButton("🛠️ Maintenance", callback_data="maintenance_management"),
         ],
         [
             InlineKeyboardButton("📊 Stats", callback_data="stats_management"),
+            InlineKeyboardButton("📢 Broadcast", callback_data="broadcast_management"),
         ],
         [
             InlineKeyboardButton("❌ Close", callback_data="close")
@@ -531,7 +538,7 @@ async def admin_panel(client, message):
     ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await message.reply_text("👮‍♂️ Admin Panel:\nChoose a category:", reply_markup=reply_markup)
+    await message.reply_text("🖥️ 𝒜𝒹𝓂𝒾𝓃 𝒫𝒶𝓃𝑒𝓁 \n", reply_markup=reply_markup)
 
 @Mbot.on_callback_query(filters.regex(r"ban_management"))
 async def ban_management_panel(client, callback_query):
@@ -540,7 +547,7 @@ async def ban_management_panel(client, callback_query):
     keyboard = [
         [
             InlineKeyboardButton("🚫 Ban User", callback_data="ban_user"),
-            InlineKeyboardButton("🔓 Unban User", callback_data="unban_user"),
+            InlineKeyboardButton("🟢 Unban User", callback_data="unban_user"),
         ],
         [
             InlineKeyboardButton("📋 View Ban List", callback_data="view_ban_list"),
@@ -549,7 +556,7 @@ async def ban_management_panel(client, callback_query):
     ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await callback_query.message.edit_text("🔨 Ban Management:\nChoose an action:", reply_markup=reply_markup)
+    await callback_query.message.edit_text("🛑 Ban Management:\nChoose an action:", reply_markup=reply_markup)
 
 @Mbot.on_callback_query(filters.regex(r"maintenance_management"))
 async def maintenance_management_panel(client, callback_query):
@@ -581,7 +588,7 @@ async def close(_, query):
 
 @Mbot.on_callback_query(filters.regex(r"ban_user"))
 async def ban_user_callback(client, callback_query):
-    await callback_query.answer("ℹ️ Usage: /ban")
+    await callback_query.answer("ℹ️ Usage: /ban <user id>")
     
     @Mbot.on_message(filters.user(SUDO_USERS))
     async def handle_ban_user(client, message):
@@ -589,7 +596,7 @@ async def ban_user_callback(client, callback_query):
 
 @Mbot.on_callback_query(filters.regex(r"unban_user"))
 async def unban_user_callback(client, callback_query):
-    await callback_query.answer("ℹ️ Usage: /unban.")
+    await callback_query.answer("ℹ️ Usage: /unban <user id>")
     
     @Mbot.on_message(filters.user(SUDO_USERS))
     async def handle_unban_user(client, message):
@@ -606,7 +613,7 @@ async def admin_panel(client, message):
     
     keyboard = [
         [
-            InlineKeyboardButton("🔨 Ban Management", callback_data="ban_management"),
+            InlineKeyboardButton("🛑 Ban Management", callback_data="ban_management"),
             InlineKeyboardButton("🛠️ Maintenance", callback_data="maintenance_management"),
         ],
         [
@@ -627,7 +634,7 @@ async def admin_panel(client, message):
     ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await message.reply_text("👮‍♂️ Admin Panel:\nChoose a category:", reply_markup=reply_markup)
+    await message.reply_text("🖥️ 𝒜𝒹𝓂𝒾𝓃 𝒫𝒶𝓃𝑒𝓁\n", reply_markup=reply_markup)
 
 # Add the new callback functions for the commands
 @Mbot.on_callback_query(filters.regex(r"restart_bot"))
@@ -701,11 +708,12 @@ async def go_back_to_admin_panel(client, callback_query):
     
     keyboard = [
         [
-            InlineKeyboardButton("🔨 Ban Management", callback_data="ban_management"),
+            InlineKeyboardButton("🛑 Ban Management", callback_data="ban_management"),
             InlineKeyboardButton("🛠️ Maintenance", callback_data="maintenance_management"),
         ],
         [
             InlineKeyboardButton("📊 Stats", callback_data="stats_management"),
+            InlineKeyboardButton("📢 Broadcast", callback_data="broadcast_management"),
         ],
         [
             InlineKeyboardButton("🔄 Restart Bot", callback_data="restart_bot"),
@@ -721,7 +729,7 @@ async def go_back_to_admin_panel(client, callback_query):
     ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await callback_query.message.edit_text("👮‍♂️ Admin Panel:\nChoose a category:", reply_markup=reply_markup)
+    await callback_query.message.edit_text("🖥️ 𝒜𝒹𝓂𝒾𝓃 𝒫𝒶𝓃𝑒𝓁\n", reply_markup=reply_markup)
 
 
 #File paths for persisting user data
