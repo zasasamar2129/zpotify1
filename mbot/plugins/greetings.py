@@ -581,7 +581,7 @@ async def close(_, query):
 
 @Mbot.on_callback_query(filters.regex(r"ban_user"))
 async def ban_user_callback(client, callback_query):
-    await callback_query.answer("Please reply to a user's message or send their user ID to ban.")
+    await callback_query.answer("ℹ️ Usage: /ban")
     
     @Mbot.on_message(filters.user(SUDO_USERS))
     async def handle_ban_user(client, message):
@@ -589,7 +589,7 @@ async def ban_user_callback(client, callback_query):
 
 @Mbot.on_callback_query(filters.regex(r"unban_user"))
 async def unban_user_callback(client, callback_query):
-    await callback_query.answer("Please send the user ID to unban.")
+    await callback_query.answer("ℹ️ Usage: /unban.")
     
     @Mbot.on_message(filters.user(SUDO_USERS))
     async def handle_unban_user(client, message):
@@ -611,6 +611,7 @@ async def admin_panel(client, message):
         ],
         [
             InlineKeyboardButton("📊 Stats", callback_data="stats_management"),
+            InlineKeyboardButton("📢 Broadcast", callback_data="broadcast_management"),
         ],
         [
             InlineKeyboardButton("🔄 Restart Bot", callback_data="restart_bot"),
@@ -721,3 +722,67 @@ async def go_back_to_admin_panel(client, callback_query):
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     await callback_query.message.edit_text("👮‍♂️ Admin Panel:\nChoose a category:", reply_markup=reply_markup)
+
+
+#File paths for persisting user data
+USER_LIST_FILE = "user_list.json"
+
+# Load and save user list functions
+def load_user_list():
+    if os.path.exists(USER_LIST_FILE):
+        with open(USER_LIST_FILE, "r") as f:
+            return set(json.load(f))
+    return set()
+
+def save_user_list(user_list):
+    with open(USER_LIST_FILE, "w") as f:
+        json.dump(list(user_list), f)
+
+# Initialize user list
+user_list = load_user_list()
+
+# Broadcast command
+@Mbot.on_message(filters.command("broadcast") & filters.user(SUDO_USERS))
+async def broadcast_message(client, message):
+    await message.delete()
+
+    if len(message.command) < 2:
+        await message.reply_text("❌ Usage: /broadcast <message>")
+        return
+
+    broadcast_text = message.text.split(None, 1)[1]
+    failed = 0
+
+    await message.reply_text(f"Broadcast initiated. Sending message to {len(user_list)} users...")
+
+    for user_id in user_list:
+        try:
+            await client.send_message(chat_id=user_id, text=broadcast_text)
+            await sleep(0.1)  # Slow down to prevent API flood
+        except Exception:
+            failed += 1
+
+    await message.reply_text(
+        f"✅ Broadcast complete. Delivered to {len(user_list) - failed} users. Failed: {failed} users."
+    )
+
+
+    
+    # Add callback handler for broadcast
+@Mbot.on_callback_query(filters.regex(r"broadcast_management"))
+async def broadcast_management_panel(client, callback_query):
+    await callback_query.answer()
+
+    keyboard = [
+        [InlineKeyboardButton("📢 Send Broadcast", callback_data="send_broadcast")],
+        [InlineKeyboardButton("🔙 Back", callback_data="admin")]
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await callback_query.message.edit_text("📢 Broadcast Management:\nChoose an action:", reply_markup=reply_markup)
+
+@Mbot.on_callback_query(filters.regex(r"send_broadcast"))
+async def prompt_broadcast(client, callback_query):
+    await callback_query.answer()
+    await callback_query.message.reply_text("ℹ️ Use /broadcast <message> to send a broadcast message.")
+    await callback_query.message.delete()

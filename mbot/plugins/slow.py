@@ -81,28 +81,10 @@ genius = Genius("api_key")
 # async def __(c, m):
 #     await foo(c, m, cb=True)
 
-
-@Mbot.on_message(filters.command("cancel") & filters.user(SUDO_USERS))
-async def cancel_task(client, message):
-    user_id = message.from_user.id
-
-    if is_focused(user_id):
-        clear_focus(user_id)
-        await message.reply_text("❌ Current task canceled.")
-    else:
-        await message.reply_text("ℹ️ No active tasks to cancel.")
-
 ##  & filters.private add this to respond only in private Chat
 @Mbot.on_message(filters.incoming & filters.text, group=-3)
 async def _(c, m):
     user_id = m.from_user.id
-
-    # Check if user is already focused
-    if is_focused(user_id):
-        await m.reply_text("⚠️ You are already engaged in a task. Please wait for it to finish or cancel it with `/cancel`.")
-        return
-
-    
 
     try:
         if not m.text or m.text.startswith(('/', 'https:', 'http:', ',', '.', '🎧')):
@@ -138,8 +120,6 @@ async def _(c, m):
     except Exception as e:
         await m.reply(f"An error occurred: {str(e)}")
     finally:
-        # Clear focus after processing
-        clear_focus(user_id)
         await m.continue_propagation()
         
 
@@ -240,9 +220,6 @@ async def search(Mbot: Mbot, query: CallbackQuery):
         await query.answer("Sorry, We Are Unable To Procced It 🤕❣️")
     #   await Mbot.send_message(BUG,f"Query Raised Erorr {e} On {query.message.chat.id} {query.message.from_user.mention}")
     finally: 
-        
-        clear_focus(user_id)
-
         await sleep(2.0)
         try:
             rmtree(randomdir)
