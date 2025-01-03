@@ -533,6 +533,9 @@ async def admin_panel(client, message):
             InlineKeyboardButton("📢 Broadcast", callback_data="broadcast_management"),
         ],
         [
+            InlineKeyboardButton("👥 List Users", callback_data="list_users_management"),
+        ],
+        [
             InlineKeyboardButton("❌ Close", callback_data="close")
         ]
     ]
@@ -627,6 +630,9 @@ async def admin_panel(client, message):
         [
             InlineKeyboardButton("📜 View Logs", callback_data="view_logs"),
             InlineKeyboardButton("💻 CPU Usage", callback_data="cpu_usage"),
+        ],
+        [
+            InlineKeyboardButton("👥 List Users", callback_data="list_users_management"),
         ],
         [
             InlineKeyboardButton("❌ Close", callback_data="close")
@@ -724,6 +730,9 @@ async def go_back_to_admin_panel(client, callback_query):
             InlineKeyboardButton("💻 CPU Usage", callback_data="cpu_usage"),
         ],
         [
+            InlineKeyboardButton("👥 List Users", callback_data="list_users_management"),
+        ],
+        [
             InlineKeyboardButton("❌ Close", callback_data="close")
         ]
     ]
@@ -794,3 +803,91 @@ async def prompt_broadcast(client, callback_query):
     await callback_query.answer()
     await callback_query.message.reply_text("ℹ️ Use /broadcast <message> to send a broadcast message.")
     await callback_query.message.delete()
+
+
+@Mbot.on_message(filters.command("list_users") & filters.user(SUDO_USERS))
+async def list_users(client, message):
+    await message.delete()
+    
+    # Create inline buttons for HTML or plain message
+    keyboard = [
+        [
+            InlineKeyboardButton("💬 Send as Message", callback_data="send_as_message"),
+            InlineKeyboardButton("｡🇯‌🇸‌ Send as Json", callback_data="send_as_json"),
+        ],
+        [   InlineKeyboardButton("❌ Close", callback_data="close")]
+    ]
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await message.reply_text("🗄️ Choose how to send the user list:", reply_markup=reply_markup)
+
+import json
+
+@Mbot.on_callback_query(filters.regex(r"send_as_(message|html|json|log)"))
+async def send_user_list(client, callback_query):
+    await callback_query.answer()
+    
+    format_type = callback_query.data.split("_")[-1]  # Get 'message', 'html', 'json', or 'log'
+    
+    # Load user list
+    user_list = load_user_list()
+    
+    if not user_list:
+        await callback_query.message.edit_text("No users found.")
+        return
+    
+    user_details = []
+    for user_id in user_list:
+        try:
+            user = await client.get_users(user_id)
+            user_details.append({
+                "id": user.id,
+                "name": user.first_name,
+                "username": user.username if user.username else "N/A"
+            })
+        except Exception as e:
+            user_details.append({
+                "id": user_id,
+                "name": "N/A",
+                "username": "N/A",
+                "error": str(e)
+            })
+    
+    if format_type == "message":
+        user_list_text = "\n".join([f"ID: {u['id']}\nName: {u['name']}\nUsername: @{u['username']}" for u in user_details])
+        await callback_query.message.reply_text(f"User List:\n{user_list_text}")
+    elif format_type == "html":
+        user_list_html = "<br>".join([f"ID: {u['id']}<br>Name: {u['name']}<br>Username: @{u['username']}" for u in user_details])
+        await callback_query.message.reply_text(
+            f"<b>User List:</b><br>{user_list_html}",
+            parse_mode="HTML"
+        )
+    elif format_type in {"json", "log"}:
+        # Create the file content
+        file_content = json.dumps(user_details, indent=4) if format_type == "json" else "\n".join(
+            [f"ID: {u['id']}, Name: {u['name']}, Username: @{u['username']}" for u in user_details]
+        )
+        
+        # Determine file name and type
+        file_name = "user_list.json" if format_type == "json" else "user_list.log"
+        file_path = f"/tmp/{file_name}"
+        
+        # Write to file
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(file_content)
+        
+        # Send the file
+        await client.send_document(
+            chat_id=callback_query.message.chat.id,
+            document=file_path,
+            caption=f"🗄️Here is the user list as a {format_type.upper()} file."
+        )
+
+
+
+@Mbot.on_callback_query(filters.regex(r"list_users_management"))
+async def list_users_management_panel(client, callback_query):
+    await callback_query.answer()
+    await list_users(client, callback_query.message)  # Call the existing list_users function
+
+
