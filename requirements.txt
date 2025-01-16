@@ -4,7 +4,6 @@ git+https://github.com/Masterolic/pyrogram.git
 tgcrypto
 lyricsgenius
 git+https://github.com/yt-dlp/yt-dlp/
-git+https://github.com/coletdjnz/yt-dlp-youtube-oauth2.git
 git+https://github.com/pukkandan/yt-dlp-YTAgeGateBypass/
 python-dotenv
 requests
