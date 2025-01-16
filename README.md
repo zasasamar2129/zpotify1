@@ -55,25 +55,25 @@ Add these variables in [config.env](https://github.com/zasasamar2129/zpotify1/bl
 
 ### Required Environment Variables
 ```env
-API_ID = ""              # Get this from https://my.telegram.org
-API_HASH = ""            # Get this from https://my.telegram.org
-BOT_TOKEN = ""           # Your bot token
-OWNER_ID = ""            # Your Telegram ID
-SPOTIPY_CLIENT_ID = ""  # Get this from developers.spotify.com
+API_ID = ""                # Get this from https://my.telegram.org
+API_HASH = ""              # Get this from https://my.telegram.org
+BOT_TOKEN = ""             # Your bot token
+OWNER_ID = ""              # Your Telegram ID
+SPOTIPY_CLIENT_ID = ""     # Get this from developers.spotify.com
 SPOTIPY_CLIENT_SECRET = "" # Get this from developers.spotify.com
 ```
 
 ### Optional Environment Variables
 ```env
-SUDO_USERS = ""          # Space-separated user IDs with admin permissions
-AUTH_CHATS = ""          # Space-separated chat IDs allowed to use the bot
-LOG_GROUP = ""           # ID of a log group (optional)
-BUG = ""                 # Error log group ID (optional)
-GENIUS_API = ""          # Genius API key (optional)
-XDG_CACHE_HOME = "~/.tmp" # Temporary file storage path (optional)
-FIXIE_SOCKS_HOST = ""    # Proxy URL (optional)
-F_SUB = False             # Enable forced subscription (default: False)
-F_SUB_CHANNEL_ID = ""    # Channel ID for forced subscription (optional)
+SUDO_USERS = ""                # Space-separated user IDs with admin permissions
+AUTH_CHATS = ""                # Space-separated chat IDs allowed to use the bot
+LOG_GROUP = ""                 # ID of a log group (optional)
+BUG = ""                       # Error log group ID (optional)
+GENIUS_API = ""                # Genius API key (optional)
+XDG_CACHE_HOME = "~/.tmp"      # Temporary file storage path (optional)
+FIXIE_SOCKS_HOST = ""          # Proxy URL (optional)
+F_SUB = False                  # Enable forced subscription (default: False)
+F_SUB_CHANNEL_ID = ""          # Channel ID for forced subscription (optional)
 F_SUB_CHANNEL_INVITE_LINK = "" # Channel invite link for forced subscription (optional)
 ```
 
