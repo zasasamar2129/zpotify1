@@ -36,8 +36,9 @@ from pyrogram.errors.exceptions.bad_request_400 import MessageTooLong, PeerIdInv
 #from Script import script
 from pyrogram.errors import ChatAdminRequired
 from mbot import BUG,Mbot
-from mutagen.mp3 import MP3
+import json
 import os
+from mutagen.mp3 import MP3
 ADMINS = 5337964165
 from requests.exceptions import MissingSchema
 client = Spotify(auth_manager=SpotifyClientCredentials())
@@ -49,7 +50,6 @@ ID - <code>{}</code>
 Name - {}
 """
 pre = []
-
 ##Load banned users from file######
 BAN_LIST_FILE = "banned_users.json"
 # Load banned users from file
@@ -60,8 +60,8 @@ def load_banned_users():
     return set()
 banned_users = load_banned_users()
 ####################################
-
 from mbot.utils.util import is_maintenance_mode
+
 @Mbot.on_message(filters.incoming & filters.regex(r'https?://open.spotify.com[^\s]+') | filters.incoming & filters.regex(r'https?://spotify.link[^\s]+'))
 async def spotify_dl(Mbot,message: Message):
 
@@ -74,7 +74,7 @@ async def spotify_dl(Mbot,message: Message):
     if message.from_user.id in banned_users:
         await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) ")
         return
-
+        
     if MAIN:
        await message.reply_text(f"Bot Is Under Maintenance ⚠️")
        return
@@ -517,7 +517,7 @@ async def spotify_dl(Mbot,message: Message):
         try:
             await message.reply_text(f"Done✅",   
          reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="Feedback", callback_data="feed")]]))
-            await message.reply_text(f"Check out @spotify_downloa(music)  @spotifynewss(News)")
+            await message.reply_text(f"Check out @spotify_downloa(music)  @Zpotify1(News)")
             await m.delete()
         except:
             pass 
@@ -540,7 +540,7 @@ async def bug(_,query):
           K = await query.message.edit(f'please report to the dev say "private version" with above  error occurred message')
           await sleep(2.3)
           H = await query.message.edit(f"Bug Report 🪲",
-                  reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="Report to dev ", url="https://t.me/masterolic")]]))
+                  reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="Report to dev ", url="https://t.me/itachi2129")]]))
           if BUG:
              await copy(K,H)
       except Exception as e:
