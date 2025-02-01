@@ -76,6 +76,6 @@ async def twitter_handler(Mbot, message):
           if "dump_file" in locals():
              await dump_file.copy(DUMP_GROUP)
        await m.delete()
-       await message.reply("Check out @spotify_downloa_bot(music)  @spotifynewss(Channel) \n Please Support Us By /donate To Maintain This Project")               
+       await message.reply("Check out @z_downloadbot(music)  @Zpotify1(Channel) \n Please Support Us By /donate To Maintain This Project")               
                   
     
