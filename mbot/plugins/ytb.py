@@ -185,7 +185,7 @@ async def _(Mbot,message):
             await m.delete()
             if LOG_GROUP:
                await Mbot.send_message(LOG_GROUP,f"YouTube Shorts {e} {link}")
-               await message.reply(f"400: Sorry, Unable To Find It  try another or report it  to @masterolic or support chat @spotify_supportbot 🤖  ")
+               await message.reply(f"400: Sorry, Unable To Find It  try another or report it  to @itachi2129 or support chat @z_support1 🤖  ")
                print(traceback.format_exc())
                await Mbot.send_message(LOG_GROUP, traceback.format_exc())
                
@@ -216,5 +216,5 @@ async def _(Mbot,message):
         print(e)
         if LOG_GROUP:
                await Mbot.send_message(LOG_GROUP,f"Youtube {e} {link}")
-               await message.reply(f"400: Sorry, Unable To Find It  try another or report it  to @masterolic or support chat @spotify_supportbot 🤖  ")
+               await message.reply(f"400: Sorry, Unable To Find It  try another or report it  to @itachi2129 or support chat @z_support1 🤖  ")
                await Mbot.send_message(LOG_GROUP, traceback.format_exc())
