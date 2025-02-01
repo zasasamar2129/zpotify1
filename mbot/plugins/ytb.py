@@ -211,7 +211,7 @@ async def handle_download_choice(Mbot, callback_query):
             if os.path.exists(randomdir):
                 rmtree(randomdir)
     except Exception as e:
-        await callback_query.message.reply_text(f"400: Sorry, Unable To Find It  try another or report it  to @masterolic or support chat @spotify_supportbot 🤖  ")
+        await callback_query.message.reply_text(f"400: Sorry, Unable To Find It  try another or report it  to @itachi2129 or support chat @z_support1 🤖  ")
         if LOG_GROUP:
             await Mbot.send_message(LOG_GROUP, f"Youtube {e} {link}")
             await Mbot.send_message(LOG_GROUP, traceback.format_exc())
