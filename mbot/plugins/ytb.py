@@ -175,8 +175,8 @@ async def _(Mbot, message):
     # Inline keyboard for choosing between video and audio
     keyboard = InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("Download Video", callback_data=f"video_{link}")],
-            [InlineKeyboardButton("Download Audio", callback_data=f"audio_{link}")]
+            [InlineKeyboardButton("Download Video 📽️", callback_data=f"video_{link}")],
+            [InlineKeyboardButton("Download Audio 🎵", callback_data=f"audio_{link}")]
         ]
     )
     await message.reply_text("Choose the format you want to download:", reply_markup=keyboard)
