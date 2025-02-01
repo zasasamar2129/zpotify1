@@ -189,7 +189,7 @@ async def _(Mbot,message):
                print(traceback.format_exc())
                await Mbot.send_message(LOG_GROUP, traceback.format_exc())
                
-        return await message.reply("Check out @spotify_downloa_bot(music)  @spotifynewss(Channel) \n Please Support Us By /donate To Maintain This Project")
+        return await message.reply("Check out @z_downloadbot(music)  @Zpotify1(Channel) \n Please Support Us By /donate To Maintain This Project")
     try:
         ids = await getIds(message.matches[0].group(0))
         videoInPlaylist = len(ids)
@@ -211,7 +211,7 @@ async def _(Mbot,message):
         await m.delete()
         if os.path.exists(randomdir):
            rmtree(randomdir)
-        await message.reply("Check out @spotify_downloa_bot(music)  @spotifynewss(Channel) \n Please Support Us By /donate To Maintain This Project")
+        await message.reply("Check out @z_downloadbot(music)  @Zpotify1(Channel) \n Please Support Us By /donate To Maintain This Project")
     except Exception as e:
         print(e)
         if LOG_GROUP:
