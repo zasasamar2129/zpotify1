@@ -138,7 +138,7 @@ async def spotify_dl(Mbot,message: Message):
     randomdir = f"/tmp/{str(randint(1,100000000))}"
     mkdir(randomdir)
     try:
-        m = await message.reply_text(f"⏳")
+        m = await message.reply_sticker("CAACAgIAAxkBATWhF2Qz1Y-FKIKqlw88oYgN8N82FtC8AAJnAAPb234AAT3fFO9hR5GfHgQ")
         await message.reply_chat_action(enums.ChatAction.TYPING)
     except ChatWriteForbidden:
         pass
