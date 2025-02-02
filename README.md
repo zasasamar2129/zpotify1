@@ -86,7 +86,7 @@ F_SUB_CHANNEL_INVITE_LINK = "" # Channel invite link for forced subscription (op
 - 🛠️ **Customizable via Environment Variables**
 - 📜 **Error Logging**
 - 🔒 **Secure Configuration**
-
+- 💎 **Admin Panel**
 ---
 
 ## 🍕 Support
