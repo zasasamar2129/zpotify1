@@ -958,31 +958,30 @@ async def send_user_list(client, callback_query):
             })
     
     if format_type == "message":
-        # Stylish formatting using Markdown
-        user_list_text = "**📊 User List**\n\n"
-        for i, user in enumerate(user_details, start=1):
-            user_list_text += (
-                f"**👤 User {i}**\n"
-                f"🆔 **ID:** `{user['id']}`\n"
-                f"📛 **Name:** {user['name']}\n"
-                f"🌐 **Username:** @{user['username']}\n"
-                f"────────────────────\n"
-            )
-        await callback_query.message.reply_text(user_list_text, parse_mode="Markdown")
-    
+        user_list_text = "\n".join([
+    f"➤ <b>🆔:</b> <code>{u['id']}</code>\n"
+    f"    📛 <b>Name:</b> <i>{u['name']}</i>\n"
+    f"    🌐 <b>Username:</b> @{u['username'] if u['username'] != 'N/A' else 'N/A'}\n"
+    f"   ───────────────────────────"  # Separator line
+    for u in user_details
+])
+
+        await callback_query.message.reply_text(
+        f"<b>🗄️ User List:</b>\n\n{user_list_text}",
+        
+)
     elif format_type == "html":
-        # Stylish formatting using HTML
-        user_list_html = "<b>📊 User List</b>\n\n"
-        for i, user in enumerate(user_details, start=1):
-            user_list_html += (
-                f"<b>👤 User {i}</b>\n"
-                f"🆔 <b>ID:</b> <code>{user['id']}</code>\n"
-                f"📛 <b>Name:</b> {user['name']}\n"
-                f"🌐 <b>Username:</b> @{user['username']}\n"
-                f"────────────────────\n"
-            )
-        await callback_query.message.reply_text(user_list_html, parse_mode="HTML")
-    
+        user_list_html = "\n".join([
+    f"➤ <b>🆔:</b> <code>{u['id']}</code>\n"
+    f"    📛 <b>Name:</b> <i>{u['name']}</i>\n"
+    f"    🌐 <b>Username:</b> @{u['username'] if u['username'] != 'N/A' else 'N/A'}\n"
+    f"   ───────────────────────────"  # Separator line
+    for u in user_details
+])
+        await callback_query.message.reply_text(
+            f"<b>User List:</b><br>{user_list_html}",
+            parse_mode="HTML"
+        )
     elif format_type in {"json", "log"}:
         # Create the file content
         file_content = json.dumps(user_details, indent=4) if format_type == "json" else "\n".join(
@@ -1001,11 +1000,12 @@ async def send_user_list(client, callback_query):
         await client.send_document(
             chat_id=callback_query.message.chat.id,
             document=file_path,
-            caption=f"🗄️ Here is the user list as a {format_type.upper()} file."
+            caption=f"🗄️Here is the user list as a {format_type.upper()} file."
         )
+
+
 
 @Mbot.on_callback_query(filters.regex(r"list_users_management"))
 async def list_users_management_panel(client, callback_query):
     await callback_query.answer()
     await list_users(client, callback_query.message)  # Call the existing list_users function
-
