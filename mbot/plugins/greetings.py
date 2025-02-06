@@ -708,10 +708,111 @@ async def handle_shutdown_query(_, callback_query):
 
 
 #################################################################################################
-@Mbot.on_callback_query(filters.regex(r"admin"))
-async def go_back_to_admin_panel(client, callback_query):
+# File path for the config.env file
+CONFIG_ENV_FILE = "config.env"
+
+# Function to load environment variables from config.env
+def load_env_vars():
+    env_vars = {}
+    if os.path.exists(CONFIG_ENV_FILE):
+        with open(CONFIG_ENV_FILE, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#"):  # Ignore comments and empty lines
+                    key, value = line.split("=", 1)
+                    env_vars[key.strip()] = value.strip()
+    return env_vars
+
+# Function to save environment variables to config.env
+def save_env_vars(env_vars):
+    with open(CONFIG_ENV_FILE, "w") as f:
+        for key, value in env_vars.items():
+            f.write(f"{key}={value}\n")
+
+# Command to set environment variables
+@Mbot.on_message(filters.command("setenv") & filters.user(SUDO_USERS))
+async def set_env(client, message):
+    await message.delete()
+
+    if len(message.command) < 3:
+        await message.reply_text("❌ Usage: /setenv (key) (value)")
+        return
+
+    key = message.command[1]
+    value = " ".join(message.command[2:])
+
+    # Load existing environment variables
+    env_vars = load_env_vars()
+
+    # Update the environment variable
+    env_vars[key] = value
+    save_env_vars(env_vars)
+
+    await message.reply_text(f"✅ Environment variable `{key}` set to `{value}`.")
+
+# Callback handler for environment variable management
+@Mbot.on_callback_query(filters.regex(r"env_management"))
+async def env_management_panel(client, callback_query):
     await callback_query.answer()
-    
+
+    keyboard = [
+        [InlineKeyboardButton("📝 Edit Environment Variables", callback_data="edit_env_vars")],
+        [InlineKeyboardButton("📋 View Environment Variables", callback_data="view_env_vars")],
+        [InlineKeyboardButton("🔙 Back", callback_data="admin")]
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await callback_query.message.edit_text("🌍 Environment Variable Management:\nChoose an action:", reply_markup=reply_markup)
+
+# Callback handler to view environment variables
+@Mbot.on_callback_query(filters.regex(r"view_env_vars"))
+async def view_env_vars(client, callback_query):
+    await callback_query.answer()
+
+    env_vars = load_env_vars()
+    if not env_vars:
+        await callback_query.message.edit_text("No environment variables found.")
+        return
+
+    # Create a clean and appealing format for the environment variables
+    env_vars_text = "🌍 **Environment Variables** 🌍\n\n"
+    for key, value in env_vars.items():
+        env_vars_text += f"🔑 **{key}**:\n"
+        env_vars_text += f"   📌 `{value}`\n\n"
+
+    await callback_query.message.edit_text(env_vars_text)
+
+# Callback handler to edit environment variables
+@Mbot.on_callback_query(filters.regex(r"edit_env_vars"))
+async def edit_env_vars(client, callback_query):
+    await callback_query.answer()
+
+    keyboard = [
+        [InlineKeyboardButton("➕ Add New Variable", callback_data="add_env_var")],
+        [InlineKeyboardButton("✏️ Edit Existing Variable", callback_data="edit_existing_var")],
+        [InlineKeyboardButton("🔙 Back", callback_data="env_management")]
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await callback_query.message.edit_text("📝 Edit Environment Variables:\nChoose an action:", reply_markup=reply_markup)
+
+# Callback handler to add a new environment variable
+@Mbot.on_callback_query(filters.regex(r"add_env_var"))
+async def add_env_var(client, callback_query):
+    await callback_query.answer("ℹ️ Use /setenv <key> <value> to add a new environment variable.")
+    await callback_query.message.delete()
+
+# Callback handler to edit an existing environment variable
+@Mbot.on_callback_query(filters.regex(r"edit_existing_var"))
+async def edit_existing_var(client, callback_query):
+    await callback_query.answer("ℹ️ Use /setenv <key> <value> to edit an existing environment variable.")
+    await callback_query.message.delete()
+
+# Update the admin panel to include environment variable management
+@Mbot.on_message(filters.command("admin") & filters.user(SUDO_USERS))
+async def admin_panel(client, message):
+    await message.delete()
+
     keyboard = [
         [
             InlineKeyboardButton("🛑 Ban Management", callback_data="ban_management"),
@@ -720,6 +821,9 @@ async def go_back_to_admin_panel(client, callback_query):
         [
             InlineKeyboardButton("📊 Stats", callback_data="stats_management"),
             InlineKeyboardButton("📢 Broadcast", callback_data="broadcast_management"),
+        ],
+        [
+            InlineKeyboardButton("🌍 Environment Variables", callback_data="env_management"),
         ],
         [
             InlineKeyboardButton("🔄 Restart Bot", callback_data="restart_bot"),
@@ -736,9 +840,9 @@ async def go_back_to_admin_panel(client, callback_query):
             InlineKeyboardButton("❌ Close", callback_data="close")
         ]
     ]
-    
+
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await callback_query.message.edit_text("🖥️ 𝒜𝒹𝓂𝒾𝓃 𝒫𝒶𝓃𝑒𝓁\n", reply_markup=reply_markup)
+    await message.reply_text("🖥️ 𝒜𝒹𝓂𝒾𝓃 𝒫𝒶𝓃𝑒𝓁\n", reply_markup=reply_markup)
 
 
 #File paths for persisting user data
