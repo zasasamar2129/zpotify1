@@ -960,7 +960,7 @@ async def send_user_list(client, callback_query):
     if format_type == "message":
         user_list_text = "\n".join([
     f"➤ <b>🆔:</b> <code>{u['id']}</code>\n"
-    f"    📛 <b>Name:</b> <i>{u['name']}</i>\n"
+    f"    🏷️ <b>Name:</b> <i>{u['name']}</i>\n"
     f"    🌐 <b>Username:</b> @{u['username'] if u['username'] != 'N/A' else 'N/A'}\n"
     f"   ───────────────────────────"  # Separator line
     for u in user_details
