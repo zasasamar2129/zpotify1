@@ -19,11 +19,11 @@ USER_LANGUAGES_FILE = "user_languages.json"
 # Dictionary to map language codes to their display names
 LANGUAGES = {
     "en": "English",
-    "fa": "Persian",
-    "es": "Spanish",
-    "ru": "Russian",
-    "ar": "Arabic",
-    "hi": "Hindi"
+    "fa": "فارسی",
+    "es": "Españolah",
+    "ru": "Русский",
+    "ar": "عربی",
+    "hi": "हिन्दी"
 }
 
 # Load user language preferences
@@ -95,7 +95,7 @@ async def send_main_start_message(client, message, lang_code):
         "banned": "🚫 You are banned from using this bot.",
         "maintenance": "🔧 The bot is under maintenance. Please try again later.",
         "unable_to_find": "400: Sorry, Unable To Find It. Try another or report it to @itachi2129 or support chat @spotify_supportbot 🤖",
-        "support_message": "Check out @z_downloadbot (music) @spotifynewss (Channel) \n Please Support Us By /donate To Maintain This Project",
+        "support_message": "Check out @z_downloadbot (music) @zpotify1 (Channel) \n Please Support Us By /donate To Maintain This Project",
     },
     "fa": {
         "start_download": "🎧 درخواست شما در حال دانلود... لطفا منتظر بمانید!",
@@ -104,7 +104,7 @@ async def send_main_start_message(client, message, lang_code):
         "banned": "🚫 شما از استفاده از این ربات محروم شده‌اید.",
         "maintenance": "🔧 ربات در حال تعمیر و نگهداری است. لطفا بعدا تلاش کنید.",
         "unable_to_find": "400: متأسفم، نمی توانم آن را پیدا کنم. دیگری را امتحان کنید یا آن را به @itachi2129 گزارش دهید یا از چت @spotify_supportbot 🤖 پشتیبانی کنید",
-        "support_message": "بررسی کنید @z_downloadbot (موسیقی) @spotifynewss (کانال) \n لطفاً با /donate از این پروژه حمایت کنید تا به کار خود ادامه دهد",
+        "support_message": "بررسی کنید @z_downloadbot (موسیقی) @zpotify1 (کانال) \n لطفاً با /donate از این پروژه حمایت کنید تا به کار خود ادامه دهد",
     },
     "es": {
         "start_download": "🎧 Descargando tu solicitud... ¡Por favor espera!",
@@ -113,7 +113,7 @@ async def send_main_start_message(client, message, lang_code):
         "banned": "🚫 Estás prohibido de usar este bot.",
         "maintenance": "🔧 El bot está en mantenimiento. Inténtalo más tarde.",
         "unable_to_find": "400: Lo siento, no se pudo encontrar. Inténtalo con otro o informa en @itachi2129 o en el chat de soporte @spotify_supportbot 🤖",
-        "support_message": "Consulta @z_downloadbot (música) @spotifynewss (canal) \n Apóyanos con /donate para mantener este proyecto",
+        "support_message": "Consulta @z_downloadbot (música) @zpotify1 (canal) \n Apóyanos con /donate para mantener este proyecto",
     },
     "ru": {
         "start_download": "🎧 Загружается ваш запрос... Пожалуйста, подождите!",
@@ -122,7 +122,7 @@ async def send_main_start_message(client, message, lang_code):
         "banned": "🚫 Вам запрещено использовать этого бота.",
         "maintenance": "🔧 Бот на техническом обслуживании. Попробуйте позже.",
         "unable_to_find": "400: Извините, не удалось найти. Попробуйте другой или сообщите в @itachi2129 или чат поддержки @spotify_supportbot 🤖",
-        "support_message": "Посмотрите @z_downloadbot (музыка) @spotifynewss (канал) \n Пожалуйста, поддержите нас через /donate, чтобы поддерживать этот проект",
+        "support_message": "Посмотрите @z_downloadbot (музыка) @zpotify1 (канал) \n Пожалуйста, поддержите нас через /donate, чтобы поддерживать этот проект",
     },
     "ar": {
         "start_download": "🎧 يتم تنزيل طلبك... يرجى الانتظار!",
@@ -131,7 +131,7 @@ async def send_main_start_message(client, message, lang_code):
         "banned": "🚫 أنت محظور من استخدام هذا البوت.",
         "maintenance": "🔧 البوت تحت الصيانة. يرجى المحاولة لاحقًا.",
         "unable_to_find": "400: عذرًا، لم أتمكن من العثور عليه. حاول تجربة آخر أو أبلغ عنه إلى @itachi2129 أو دعم الدردشة @spotify_supportbot 🤖",
-        "support_message": "تحقق من @z_downloadbot (الموسيقى) @spotifynewss (القناة) \n يرجى دعمنا عن طريق /donate للحفاظ على هذا المشروع",
+        "support_message": "تحقق من @z_downloadbot (الموسيقى) @zpotify1 (القناة) \n يرجى دعمنا عن طريق /donate للحفاظ على هذا المشروع",
     },
     "hi": {
         "start_download": "🎧 आपका अनुरोध डाउनलोड हो रहा है... कृपया प्रतीक्षा करें!",
@@ -140,7 +140,7 @@ async def send_main_start_message(client, message, lang_code):
         "banned": "🚫 आपको इस बॉट के उपयोग से प्रतिबंधित किया गया है।",
         "maintenance": "🔧 बॉट का रखरखाव किया जा रहा है। कृपया बाद में प्रयास करें।",
         "unable_to_find": "400: क्षमा करें, इसे खोज नहीं सका। किसी अन्य को आज़माएं या इसे @itachi2129 या समर्थन चैट @spotify_supportbot 🤖 को रिपोर्ट करें।",
-        "support_message": "@z_downloadbot (संगीत) @spotifynewss (चैनल) देखें \n कृपया इस प्रोजेक्ट को बनाए रखने के लिए /donate के माध्यम से हमारा समर्थन करें",
+        "support_message": "@z_downloadbot (संगीत) @zpotify1 (चैनल) देखें \n कृपया इस प्रोजेक्ट को बनाए रखने के लिए /donate के माध्यम से हमारा समर्थन करें",
     },
 }
 

@@ -10,6 +10,7 @@ import os
 # from utils import get_size
 import asyncio
 from asyncio import sleep
+import tempfile
 # from Script import script
 from pyrogram.types import CallbackQuery, Message
 # from database.users_chats_db import db as dib
@@ -449,7 +450,6 @@ genius = Genius("api_key")
 ##  & filters.private add this to respond only in private Chat
 @Mbot.on_message(filters.incoming & filters.text, group=-2)
 async def _(c, m):
-    
     message = m
     Mbot = c
     try:
@@ -511,12 +511,13 @@ async def _(c, m):
     except:
         pass
         await message.reply(SLOW_RESPONSES.get(user_lang, {}).get(f"results","No results found for your {query}"))
-        await K.delete()
     finally:
         await m.continue_propagation()
 
 @Mbot.on_callback_query(filters.regex(r"search"))
 async def search(Mbot: Mbot, query: CallbackQuery):
+    user_lang = get_user_language(query.from_user.id)
+     # Creates a temporary directory for storing downloads
     ind, index, track = query.data.split("_")
     try:
         message = query.message
@@ -543,6 +544,7 @@ async def search(Mbot: Mbot, query: CallbackQuery):
             thumbnail, caption=caption,
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌", callback_data="cancel")]])
         )
+        randomdir = f"/tmp/{str(randint(1, 100000000))}"
         mkdir(randomdir)
         run = True
         if run == True:
@@ -600,26 +602,8 @@ async def search(Mbot: Mbot, query: CallbackQuery):
             try:
                 dForChat = await message.reply_chat_action(enums.ChatAction.UPLOAD_AUDIO)
                 # sleep(1)
-                caption = SLOW_RESPONSES.get(language, {}).get(
-    "audio_caption",
-    "[{name}](https://open.spotify.com/track/{deezer_id}) | {album} - {artist}"
-).format(
-    name=song.get('name'),
-    deezer_id=song.get('deezer_id'),
-    album=song.get('album'),
-    artist=song.get('artist')
-)
-
-                AForCopy = await query.message.reply_audio(
-    path,
-    performer=f"{song.get('artist')}­",
-    title=f"{song.get('name')} - {song.get('artist')}",
-    caption=caption,
-    thumb=thumbnail,
-    parse_mode=enums.ParseMode.MARKDOWN,
-    quote=True,
-    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="❌", callback_data="cancel")]])
-)
+                AForCopy = await query.message.reply_audio(path, performer=f"{song.get('artist')}­", title=f"{song.get('name')} - {song.get('artist')}", caption=f"[{song.get('name')}](https://open.spotify.com/track/{song.get('deezer_id')}) | {song.get('album')} - {song.get('artist')}", thumb=thumbnail, parse_mode=enums.ParseMode.MARKDOWN, quote=True,
+                                                          reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="❌", callback_data="cancel")]]))
                 await forward(PForCopy, AForCopy)
             except Exception as e:
                 pass

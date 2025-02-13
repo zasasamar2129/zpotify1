@@ -38,11 +38,11 @@ def save_user_languages(user_languages):
 # Dictionary to map language codes to their display names
 LANGUAGES = {
     "en": "English",
-    "fa": "Persian",
-    "es": "Spanish",
-    "ru": "Russian",
-    "ar": "Arabic",
-    "hi": "Hindi"
+    "fa": "فارسی",
+    "es": "Españolah",
+    "ru": "Русский",
+    "ar": "عربی",
+    "hi": "हिन्दी"
 }
 
 
@@ -435,39 +435,13 @@ async def settings(client, message):
 @Mbot.on_message(filters.command("start"))
 @maintenance_check
 async def start(client, message):
-    user_id = message.from_user.id
-    user_lang = get_user_language(user_id)
-    
-    await message.delete()
+    user_lang = get_user_language(message.from_user.id)
 
-    if user_id in banned_users:
-        await message.reply_text(GREET_RESPONSES.get(user_lang, {}).get("banned", "You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) "))
+    await message.delete()
+    if message.from_user.id in banned_users:
+        await message.reply_text(GREET_RESPONSES.get(user_lang, {}).get("banned","You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) "))
         return
 
-    # Default commands for all users
-    commands = [
-        BotCommand("start", "🎬 Start the bot and initiate tasks"),
-        BotCommand("help", "❓ Learn how to use the bot"),
-        BotCommand("saavn", "🎶 Download music from Saavn"),
-        BotCommand("song", "🎵 Type song name to fetch it"),
-        BotCommand("lyrics", "📝 Reply with a song name to get lyrics"),
-        BotCommand("genius", "🎤 Get lyrics from GENIUS"),
-        BotCommand("search", "🔍 Find your favorite music"),
-        BotCommand("info", "ℹ️ Get info about this bot"),
-        BotCommand("ping", "⚡️ Check bot response time"),
-        BotCommand("stats", "📊 View your current status"),
-        BotCommand("settings", "⚙️ Adjust your preferences"),
-        BotCommand("donate", "💖 Support this project with a donation"),
-    ]
-
-    # Add /admin command only for Owner and Sudo Users
-    if user_id == OWNER_ID or user_id in SUDO_USERS:
-        commands.append(BotCommand("admin", "⚜️ Admin Panel"))
-
-    # Apply the commands for the specific user
-    await client.set_my_commands(commands, scope="default", user_id=user_id)
-
-    await message.reply_text("✅ Your menu commands have been set according to your access level.")
     # Add user to the user list
     user_list.add(message.from_user.id)
     save_user_list(user_list)  # Save the updated user list
@@ -1263,9 +1237,7 @@ async def handle_user_language_setting(client, message):
         user_id = int(user_id)
         lang_code = lang_code.lower()
         
-        if lang_code not in LANGUAGES:
-            await message.reply_text("⛔ Invalid language code. Please use one of the following: " + ", ".join(LANGUAGES.keys()))
-            return
+        return
         
         # Save the user's language preference
         user_languages = load_user_languages()

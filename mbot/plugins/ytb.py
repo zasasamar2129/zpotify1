@@ -159,60 +159,157 @@ async def _(Mbot,message):
 
     user_lang = get_user_language(message.from_user.id)
     YT_RESPONSES = {
-    "en": {
-        "start_download": "🎧 Downloading your request... Please wait!",
-        "download_complete": "✅ Download complete! Enjoy your music.",
-        "error": "❌ Sorry, an error occurred. Please try again or report this issue.",
-        "banned": "🚫 You are banned from using this bot.",
-        "maintenance": "🔧 The bot is under maintenance. Please try again later.",
-        "unable_to_find": "400: Sorry, Unable To Find It. Try another or report it to @itachi2129 or support chat @spotify_supportbot 🤖",
-        "support_message": "Check out @z_downloadbot (music) @spotifynewss (Channel) \n Please Support Us By /donate To Maintain This Project",
-    },
-    "fa": {
-        "start_download": "🎧 درخواست شما در حال دانلود... لطفا منتظر بمانید!",
-        "download_complete": "✅ دانلود کامل شد! از موسیقی خود لذت ببرید.",
-        "error": "❌ متاسفانه خطایی رخ داد. لطفا دوباره امتحان کنید یا مشکل را گزارش دهید.",
-        "banned": "🚫 شما از استفاده از این ربات محروم شده‌اید.",
-        "maintenance": "🔧 ربات در حال تعمیر و نگهداری است. لطفا بعدا تلاش کنید.",
-        "unable_to_find": "400: متأسفم، نمی توانم آن را پیدا کنم. دیگری را امتحان کنید یا آن را به @itachi2129 گزارش دهید یا از چت @spotify_supportbot 🤖 پشتیبانی کنید",
-        "support_message": "بررسی کنید @z_downloadbot (موسیقی) @spotifynewss (کانال) \n لطفاً با /donate از این پروژه حمایت کنید تا به کار خود ادامه دهد",
-    },
-    "es": {
-        "start_download": "🎧 Descargando tu solicitud... ¡Por favor espera!",
-        "download_complete": "✅ ¡Descarga completa! Disfruta de tu música.",
-        "error": "❌ Lo siento, ocurrió un error. Inténtalo de nuevo o informa del problema.",
-        "banned": "🚫 Estás prohibido de usar este bot.",
-        "maintenance": "🔧 El bot está en mantenimiento. Inténtalo más tarde.",
-        "unable_to_find": "400: Lo siento, no se pudo encontrar. Inténtalo con otro o informa en @itachi2129 o en el chat de soporte @spotify_supportbot 🤖",
-        "support_message": "Consulta @z_downloadbot (música) @spotifynewss (canal) \n Apóyanos con /donate para mantener este proyecto",
-    },
-    "ru": {
-        "start_download": "🎧 Загружается ваш запрос... Пожалуйста, подождите!",
-        "download_complete": "✅ Загрузка завершена! Наслаждайтесь вашей музыкой.",
-        "error": "❌ Извините, произошла ошибка. Попробуйте еще раз или сообщите о проблеме.",
-        "banned": "🚫 Вам запрещено использовать этого бота.",
-        "maintenance": "🔧 Бот на техническом обслуживании. Попробуйте позже.",
-        "unable_to_find": "400: Извините, не удалось найти. Попробуйте другой или сообщите в @itachi2129 или чат поддержки @spotify_supportbot 🤖",
-        "support_message": "Посмотрите @z_downloadbot (музыка) @spotifynewss (канал) \n Пожалуйста, поддержите нас через /donate, чтобы поддерживать этот проект",
-    },
-    "ar": {
-        "start_download": "🎧 يتم تنزيل طلبك... يرجى الانتظار!",
-        "download_complete": "✅ تم اكتمال التنزيل! استمتع بموسيقاك.",
-        "error": "❌ عذرًا، حدث خطأ. يرجى المحاولة مرة أخرى أو الإبلاغ عن المشكلة.",
-        "banned": "🚫 أنت محظور من استخدام هذا البوت.",
-        "maintenance": "🔧 البوت تحت الصيانة. يرجى المحاولة لاحقًا.",
-        "unable_to_find": "400: عذرًا، لم أتمكن من العثور عليه. حاول تجربة آخر أو أبلغ عنه إلى @itachi2129 أو دعم الدردشة @spotify_supportbot 🤖",
-        "support_message": "تحقق من @z_downloadbot (الموسيقى) @spotifynewss (القناة) \n يرجى دعمنا عن طريق /donate للحفاظ على هذا المشروع",
-    },
-    "hi": {
-        "start_download": "🎧 आपका अनुरोध डाउनलोड हो रहा है... कृपया प्रतीक्षा करें!",
-        "download_complete": "✅ डाउनलोड पूरा हुआ! अपने संगीत का आनंद लें।",
-        "error": "❌ क्षमा करें, एक त्रुटि हुई। कृपया पुनः प्रयास करें या इस समस्या की रिपोर्ट करें।",
-        "banned": "🚫 आपको इस बॉट के उपयोग से प्रतिबंधित किया गया है।",
-        "maintenance": "🔧 बॉट का रखरखाव किया जा रहा है। कृपया बाद में प्रयास करें।",
-        "unable_to_find": "400: क्षमा करें, इसे खोज नहीं सका। किसी अन्य को आज़माएं या इसे @itachi2129 या समर्थन चैट @spotify_supportbot 🤖 को रिपोर्ट करें।",
-        "support_message": "@z_downloadbot (संगीत) @spotifynewss (चैनल) देखें \n कृपया इस प्रोजेक्ट को बनाए रखने के लिए /donate के माध्यम से हमारा समर्थन करें",
-    },
+    
+  "en": {
+    "start_download": "🎧 Downloading your request... Please wait!",
+    "download_complete": "✅ Download complete! Enjoy your music.",
+    "error": "❌ Sorry, an error occurred. Please try again or report this issue.",
+    "banned": "🚫 You are banned from using this bot.",
+    "maintenance": "🔧 The bot is under maintenance. Please try again later.",
+    "unable_to_find": "400: Sorry, Unable To Find It. Try another or report it to @itachi2129 or support chat @spotify_supportbot 🤖",
+    "support_message": "Check out @z_downloadbot (music) @zpotify1 (Channel) \n Please Support Us By /donate To Maintain This Project",
+    "title": "🎧 Title",
+    "artist": "🎤 Artist",
+    "album": "💽 Album",
+    "release_year": "🗓 Release Year",
+    "image": "IMAGE",
+    "track_id": "Track ID",
+    "track_not_found": "Track Not Found ⚠️",
+    "playlist": "Playlist",
+    "description": "Description",
+    "owner": "Owner",
+    "followers": "Followers",
+    "total_tracks": "Total Tracks",
+    "valid_playlist_question": "Are you sure it's a valid playlist? 🤨",
+    "valid_song_question": "Are you sure it's a valid song? 🤨",
+    "photo_caption": "🎧 Title : {0}\n🎤 Artist : {1}\n💽 Track No : {2}\n💽 Total Track : {3}",
+    "audio_caption": "[{0}](https://youtu.be/{1}) - {2} Thank you for using - @z_downloadbot"
+  },
+  "fa": {
+    "start_download": "🎧 درخواست شما در حال دانلود... لطفا منتظر بمانید!",
+    "download_complete": "✅ دانلود کامل شد! از موسیقی خود لذت ببرید.",
+    "error": "❌ متاسفانه خطایی رخ داد. لطفا دوباره امتحان کنید یا مشکل را گزارش دهید.",
+    "banned": "🚫 شما از استفاده از این ربات محروم شده‌اید.",
+    "maintenance": "🔧 ربات در حال تعمیر و نگهداری است. لطفا بعدا تلاش کنید.",
+    "unable_to_find": "400: متأسفم، نمی توانم آن را پیدا کنم. دیگری را امتحان کنید یا آن را به @itachi2129 گزارش دهید یا از چت @spotify_supportbot 🤖 پشتیبانی کنید",
+    "support_message": "بررسی کنید @z_downloadbot (موسیقی) @zpotify1 (کانال) \n لطفاً با /donate از این پروژه حمایت کنید تا به کار خود ادامه دهد",
+    "title": "🎧 عنوان",
+    "artist": "🎤 هنرمند",
+    "album": "💽 آلبوم",
+    "release_year": "🗓 سال انتشار",
+    "image": "تصویر",
+    "track_id": "شناسه آهنگ",
+    "track_not_found": "آهنگ پیدا نشد ⚠️",
+    "playlist": "لیست پخش",
+    "description": "توضیحات",
+    "owner": "مالک",
+    "followers": "دنبال کنندگان",
+    "total_tracks": "تعداد ترک‌ها",
+    "valid_playlist_question": "آیا مطمئن هستید که این یک لیست پخش معتبر است؟ 🤨",
+    "valid_song_question": "آیا مطمئن هستید که آهنگ معتبری است؟ 🤨",
+    "photo_caption": "🎧 عنوان : {0}\n🎤 هنرمند : {1}\n💽 شماره ترک : {2}\n💽 تعداد کل ترک‌ها : {3}",
+    "audio_caption": "[{0}](https://youtu.be/{1}) - {2} با تشکر از استفاده شما - @z_downloadbot"
+  },
+  "es": {
+    "start_download": "🎧 Descargando tu solicitud... ¡Por favor espera!",
+    "download_complete": "✅ ¡Descarga completa! Disfruta de tu música.",
+    "error": "❌ Lo siento, ocurrió un error. Inténtalo de nuevo o informa del problema.",
+    "banned": "🚫 Estás prohibido de usar este bot.",
+    "maintenance": "🔧 El bot está en mantenimiento. Inténtalo más tarde.",
+    "unable_to_find": "400: Lo siento, no se pudo encontrar. Inténtalo con otro o informa en @itachi2129 o en el chat de soporte @spotify_supportbot 🤖",
+    "support_message": "Consulta @z_downloadbot (música) @zpotify1 (canal) \n Apóyanos con /donate para mantener este proyecto",
+    "title": "🎧 Título",
+    "artist": "🎤 Artista",
+    "album": "💽 Álbum",
+    "release_year": "🗓 Año de lanzamiento",
+    "image": "IMAGEN",
+    "track_id": "ID de pista",
+    "track_not_found": "Pista no encontrada ⚠️",
+    "playlist": "Lista de reproducción",
+    "description": "Descripción",
+    "owner": "Propietario",
+    "followers": "Seguidores",
+    "total_tracks": "Total de pistas",
+    "valid_playlist_question": "¿Estás seguro de que es una lista de reproducción válida? 🤨",
+    "valid_song_question": "¿Estás segura de que es una canción válida? 🤨",
+    "photo_caption": "🎧 Título : {0}\n🎤 Artista : {1}\n💽 Número de pista : {2}\n💽 Total de pistas : {3}",
+    "audio_caption": "[{0}](https://youtu.be/{1}) - {2} Gracias por usar - @z_downloadbot"
+  },
+  "ru": {
+    "start_download": "🎧 Загружается ваш запрос... Пожалуйста, подождите!",
+    "download_complete": "✅ Загрузка завершена! Наслаждайтесь вашей музыкой.",
+    "error": "❌ Извините, произошла ошибка. Попробуйте еще раз или сообщите о проблеме.",
+    "banned": "🚫 Вам запрещено использовать этого бота.",
+    "maintenance": "🔧 Бот на техническом обслуживании. Попробуйте позже.",
+    "unable_to_find": "400: Извините, не удалось найти. Попробуйте другой или сообщите в @itachi2129 или чат поддержки @spotify_supportbot 🤖",
+    "support_message": "Посмотрите @z_downloadbot (музыка) @zpotify1 (канал) \n Пожалуйста, поддержите нас через /donate, чтобы поддерживать этот проект",
+    "title": "🎧 Название",
+    "artist": "🎤 Исполнитель",
+    "album": "💽 Альбом",
+    "release_year": "🗓 Год выпуска",
+    "image": "ИЗОБРАЖЕНИЕ",
+    "track_id": "ID трека",
+    "track_not_found": "Трек не найден ⚠️",
+    "playlist": "Плейлист",
+    "description": "Описание",
+    "owner": "Владелец",
+    "followers": "Подписчики",
+    "total_tracks": "Всего треков",
+    "valid_playlist_question": "Вы уверены, что это действительный плейлист? 🤨",
+    "valid_song_question": "Вы уверены, что это действительная песня? 🤨",
+    "photo_caption": "🎧 Название : {0}\n🎤 Исполнитель : {1}\n💽 Номер трека : {2}\n💽 Всего треков : {3}",
+    "audio_caption": "[{0}](https://youtu.be/{1}) - {2} Спасибо за использование - @z_downloadbot"
+  },
+  "ar": {
+    "start_download": "🎧 يتم تنزيل طلبك... يرجى الانتظار!",
+    "download_complete": "✅ تم اكتمال التنزيل! استمتع بموسيقاك.",
+    "error": "❌ عذرًا، حدث خطأ. يرجى المحاولة مرة أخرى أو الإبلاغ عن المشكلة.",
+    "banned": "🚫 أنت محظور من استخدام هذا البوت.",
+    "maintenance": "🔧 البوت تحت الصيانة. يرجى المحاولة لاحقًا.",
+    "unable_to_find": "400: عذرًا، لم أتمكن من العثور عليه. حاول تجربة آخر أو أبلغ عنه إلى @itachi2129 أو دعم الدردشة @spotify_supportbot 🤖",
+    "support_message": "تحقق من @z_downloadbot (الموسيقى) @zpotify1 (القناة) \n يرجى دعمنا عن طريق /donate للحفاظ على هذا المشروع",
+    "title": "🎧 العنوان",
+    "artist": "🎤 الفنان",
+    "album": "💽 الألبوم",
+    "release_year": "🗓 سنة الإصدار",
+    "image": "صورة",
+    "track_id": "معرف المسار",
+    "track_not_found": "لم يتم العثور على المسار ⚠️",
+    "playlist": "قائمة تشغيل",
+    "description": "الوصف",
+    "owner": "المالك",
+    "followers": "المتابعون",
+    "total_tracks": "إجمالي المسارات",
+    "valid_playlist_question": "هل من المؤكد أنها قائمة إعادة إنتاج صالحة؟ 🤨",
+    "valid_song_question": "هل أنت متأكد من أن هذه أغنية صالحة؟ 🤨",
+    "photo_caption": "🎧 العنوان : {0}\n🎤 الفنان : {1}\n💽 رقم المسار : {2}\n💽 إجمالي المسارات : {3}",
+    "audio_caption": "[{0}](https://youtu.be/{1}) - {2} شكرًا لاستخدامك - @z_downloadbot"
+  },
+  "hi": {
+    "start_download": "🎧 आपका अनुरोध डाउनलोड हो रहा है... कृपया प्रतीक्षा करें!",
+    "download_complete": "✅ डाउनलोड पूरा हुआ! अपने संगीत का आनंद लें।",
+    "error": "❌ क्षमा करें, एक त्रुटि हुई। कृपया पुनः प्रयास करें या इस समस्या की रिपोर्ट करें।",
+    "banned": "🚫 आपको इस बॉट के उपयोग से प्रतिबंधित किया गया है।",
+    "maintenance": "🔧 बॉट का रखरखाव किया जा रहा है। कृपया बाद में प्रयास करें।",
+    "unable_to_find": "400: क्षमा करें, इसे खोज नहीं सका। किसी अन्य को आज़माएं या इसे @itachi2129 या समर्थन चैट @spotify_supportbot 🤖 को रिपोर्ट करें।",
+    "support_message": "@z_downloadbot (संगीत) @zpotify1 (चैनल) देखें \n कृपया इस प्रोजेक्ट को बनाए रखने के लिए /donate के माध्यम से हमारा समर्थन करें",
+    "title": "🎧 शीर्षक",
+    "artist": "🎤 कलाकार",
+    "album": "💽 एल्बम",
+    "release_year": "🗓 रिलीज़ वर्ष",
+    "image": "छवि",
+    "track_id": "ट्रैक आईडी",
+    "track_not_found": "ट्रैक नहीं मिला ⚠️",
+    "playlist": "प्लेलिस्ट",
+    "description": "विवरण",
+    "owner": "मालिक",
+    "followers": "फॉलोअर्स",
+    "total_tracks": "कुल गाने",
+    "valid_playlist_question": "क्या आप सुनिश्चित हैं कि यह एक वैध प्लेलिस्ट है? 🤨",
+    "valid_song_question": "क्या आप सुनिश्चित हैं कि यह एक वैध गीत है? 🤨",
+    "photo_caption": "🎧 शीर्षक : {0}\n🎤 कलाकार : {1}\n💽 ट्रैक नंबर : {2}\n💽 कुल ट्रैक : {3}",
+    "audio_caption": "[{0}](https://youtu.be/{1}) - {2} उपयोग करने के लिए धन्यवाद - @z_downloadbot"
+  }
 }
 
     if is_maintenance_mode() and message.from_user.id not in SUDO_USERS:
@@ -256,7 +353,7 @@ async def _(Mbot,message):
         return await message.reply_text(
     YT_RESPONSES.get(user_lang, {}).get(
         "support_message",
-        "Check out @z_downloadbot (music) @spotifynewss (Channel) \n Please Support Us By /donate To Maintain This Project"
+        "Check out @z_downloadbot (music) @zpotify1 (Channel) \n Please Support Us By /donate To Maintain This Project"
     )
 )
     try:
@@ -267,25 +364,18 @@ async def _(Mbot,message):
         for id in ids:
   #          await message.reply(id)
   #          await message.reply(id[2])
-            PForCopy = await message.reply_photo(f"https://i.ytimg.com/vi/{id[0]}/hqdefault.jpg",caption=f"🎧 Title : `{id[3]}`\n🎤 Artist : `{id[2]}`\n💽 Track No : `{id[1]}`\n💽 Total Track : `{videoInPlaylist}`")
-            fileLink = await  ytdl_down(randomdir,id, message.from_user.id)
+            PForCopy = await message.reply_photo(f"https://i.ytimg.com/vi/{id[0]}/hqdefault.jpg",caption=YT_RESPONSES.get(user_lang, {}).get("photo_caption", f"🎧 Title : {id[3]}\n🎤 Artist : {id[2]}\n💽 Track No : {id[1]}\n💽 Total Track : {videoInPlaylist}"))
+            fileLink = await ytdl_down(randomdir, id, message.from_user.id)
             print("down completely")
             thumnail = await thumb_down(id[0])
-          #  await message.reply(fileLink)
-        #    await message.reply_audio(fileLink)
-            AForCopy = await message.reply_audio(fileLink,caption=f"[{id[3]}](https://youtu.be/{id[0]}) - {id[2]} Thank you for using - @z_downloadbot",title=id[3].replace("_"," "),performer=id[2],thumb=thumnail,duration=id[4])
+            AForCopy = await message.reply_audio(fileLink, caption=YT_RESPONSES.get(user_lang, {}).get("audio_caption", f"[{id[3]}](https://youtu.be/{id[0]}) - {id[2]} Thank you for using - @z_downloadbot"), title=id[3].replace("_", " "), performer=id[2], thumb=thumnail, duration=id[4])
             if DUMP_GROUP:
                 await PForCopy.copy(DUMP_GROUP)
                 await AForCopy.copy(DUMP_GROUP)
         await m.delete()
         if os.path.exists(randomdir):
            rmtree(randomdir)
-        await message.reply_text(
-    YT_RESPONSES.get(user_lang, {}).get(
-        "unable_to_find",
-        "400: Sorry, Unable To Find It. Try another or report it to @itachi2129 or support chat @spotify_supportbot 🤖"
-    )
-)
+        
     except Exception as e:
         print(e)
         if LOG_GROUP:
