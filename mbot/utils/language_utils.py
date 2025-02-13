@@ -1,26 +1,150 @@
-from pyrogram import filters,Client as Mbot
-from mbot import BUG as  LOG_GROUP, LOG_GROUP as DUMP_GROUP
-import os,re,asyncio,bs4
-import requests,wget,traceback
-from mbot.utils.util import is_maintenance_mode
-from mbot import LOG_GROUP, OWNER_ID, SUDO_USERS, Mbot, AUTH_CHATS
 import json
 import os
-from mbot.utils.language_utils import get_user_language
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from spotipy.oauth2 import SpotifyClientCredentials
+from datetime import datetime
+from pyrogram import filters
+from pyrogram.raw.functions import Ping
+from mbot import LOG_GROUP, OWNER_ID, SUDO_USERS, Mbot, AUTH_CHATS
+from os import execvp, sys
+import os
+import spotipy
+import psutil
+from asyncio import sleep
+import json
+from mbot.utils.util import save_maintenance_status
+# File to store user language preferences
+USER_LANGUAGES_FILE = "user_languages.json"
 
-##Load banned users from file######
-BAN_LIST_FILE = "banned_users.json"
-# Load banned users from file
-def load_banned_users():
-    if os.path.exists(BAN_LIST_FILE):
-        with open(BAN_LIST_FILE, "r") as f:
-            return set(json.load(f))
-    return set()
-banned_users = load_banned_users()
-####################################
+# Dictionary to map language codes to their display names
+LANGUAGES = {
+    "en": "English",
+    "fa": "Persian",
+    "es": "Spanish",
+    "ru": "Russian",
+    "ar": "Arabic",
+    "hi": "Hindi"
+}
 
+# Load user language preferences
+def load_user_languages():
+    if os.path.exists(USER_LANGUAGES_FILE):
+        with open(USER_LANGUAGES_FILE, "r") as f:
+            return json.load(f)
+    return {}
 
-TWITTER_RESPONSES = {
+# Save user language preferences
+def save_user_languages(user_languages):
+    with open(USER_LANGUAGES_FILE, "w") as f:
+        json.dump(user_languages, f)
+
+# Get the user's language preference
+def get_user_language(user_id):
+    user_languages = load_user_languages()
+    return user_languages.get(str(user_id), "en")  # Default to English if no preference is set
+
+# Function to send the main start message in the selected language
+async def send_main_start_message(client, message, lang_code):
+    # Define the main start message based on the selected language
+    start_messages = {
+        "en": f"👋 Hello {message.from_user.first_name}, I'm 𝓩𝓟𝓞𝓣𝓘𝓕𝓨, a music downloader bot that supports downloading from YouTube, Spotify, SoundCloud, Deezer, and more.",
+        "fa": f"👋 سلام {message.from_user.first_name}, من 𝓩𝓟𝓞𝓣𝓘𝓕𝓨 هستم، یک ربات دانلود موزیک که از YouTube, Spotify, SoundCloud, Deezer و بیشتر پشتیبانی می‌کند.",
+        "es": f"👋 Hola {message.from_user.first_name}, soy 𝓩𝓟𝓞𝓣𝓘𝓕𝓨, un bot de descarga de música que admite descargas de YouTube, Spotify, SoundCloud, Deezer y más.",
+        "ru": f"👋 Привет {message.from_user.first_name}, я 𝓩𝓟𝓞𝓣𝓘𝓕𝓨, бот для загрузки музыки, который поддерживает загрузку с YouTube, Spotify, SoundCloud, Deezer и других.",
+        "ar": f"👋 مرحبًا {message.from_user.first_name}, أنا 𝓩𝓟𝓞𝓣𝓘𝓕𝓨, بوت لتنزيل الموسيقى يدعم التنزيل من YouTube, Spotify, SoundCloud, Deezer والمزيد.",
+        "hi": f"👋 नमस्ते {message.from_user.first_name}, मैं 𝓩𝓟𝓞𝓣𝓘𝓕𝓨 हूँ, एक संगीत डाउनलोड बॉट जो YouTube, Spotify, SoundCloud, Deezer और अन्य से डाउनलोड का समर्थन करता है।"
+    }
+
+    # Define the reply markup (buttons)
+    reply_markup = [
+        [
+            InlineKeyboardButton(
+                text="🌐 Bot Channel", url="https://t.me/Zpotify1"),
+            InlineKeyboardButton(
+                text="⛓️‍💥 Repo",
+                url="https://github.com/zasasamar2129/zpotify1"),
+            InlineKeyboardButton(text="❓Help", callback_data="helphome")
+        ],
+        [
+            InlineKeyboardButton(
+                text="💖 Donate", url="https://www.buymeacoffee.com/zasasamar"),
+        ],
+        [
+            InlineKeyboardButton(
+                text="📢 Support", url="https://t.me/itachi2129"),
+        ],
+    ]
+
+    if LOG_GROUP:
+        invite_link = await client.create_chat_invite_link(chat_id=(int(LOG_GROUP) if str(LOG_GROUP).startswith("-100") else LOG_GROUP))
+        reply_markup.append([InlineKeyboardButton("🗃️ LOG Channel", url=invite_link.invite_link)])
+
+    # Send the main start message
+    await message.reply_text(
+        start_messages.get(lang_code, start_messages["en"]),  # Default to English if the language is not found
+        reply_markup=InlineKeyboardMarkup(reply_markup)
+    )
+
+##############################################DICTIONARY#####################################################
+
+    YT_RESPONSES = {
+    "en": {
+        "start_download": "🎧 Downloading your request... Please wait!",
+        "download_complete": "✅ Download complete! Enjoy your music.",
+        "error": "❌ Sorry, an error occurred. Please try again or report this issue.",
+        "banned": "🚫 You are banned from using this bot.",
+        "maintenance": "🔧 The bot is under maintenance. Please try again later.",
+        "unable_to_find": "400: Sorry, Unable To Find It. Try another or report it to @itachi2129 or support chat @spotify_supportbot 🤖",
+        "support_message": "Check out @z_downloadbot (music) @spotifynewss (Channel) \n Please Support Us By /donate To Maintain This Project",
+    },
+    "fa": {
+        "start_download": "🎧 درخواست شما در حال دانلود... لطفا منتظر بمانید!",
+        "download_complete": "✅ دانلود کامل شد! از موسیقی خود لذت ببرید.",
+        "error": "❌ متاسفانه خطایی رخ داد. لطفا دوباره امتحان کنید یا مشکل را گزارش دهید.",
+        "banned": "🚫 شما از استفاده از این ربات محروم شده‌اید.",
+        "maintenance": "🔧 ربات در حال تعمیر و نگهداری است. لطفا بعدا تلاش کنید.",
+        "unable_to_find": "400: متأسفم، نمی توانم آن را پیدا کنم. دیگری را امتحان کنید یا آن را به @itachi2129 گزارش دهید یا از چت @spotify_supportbot 🤖 پشتیبانی کنید",
+        "support_message": "بررسی کنید @z_downloadbot (موسیقی) @spotifynewss (کانال) \n لطفاً با /donate از این پروژه حمایت کنید تا به کار خود ادامه دهد",
+    },
+    "es": {
+        "start_download": "🎧 Descargando tu solicitud... ¡Por favor espera!",
+        "download_complete": "✅ ¡Descarga completa! Disfruta de tu música.",
+        "error": "❌ Lo siento, ocurrió un error. Inténtalo de nuevo o informa del problema.",
+        "banned": "🚫 Estás prohibido de usar este bot.",
+        "maintenance": "🔧 El bot está en mantenimiento. Inténtalo más tarde.",
+        "unable_to_find": "400: Lo siento, no se pudo encontrar. Inténtalo con otro o informa en @itachi2129 o en el chat de soporte @spotify_supportbot 🤖",
+        "support_message": "Consulta @z_downloadbot (música) @spotifynewss (canal) \n Apóyanos con /donate para mantener este proyecto",
+    },
+    "ru": {
+        "start_download": "🎧 Загружается ваш запрос... Пожалуйста, подождите!",
+        "download_complete": "✅ Загрузка завершена! Наслаждайтесь вашей музыкой.",
+        "error": "❌ Извините, произошла ошибка. Попробуйте еще раз или сообщите о проблеме.",
+        "banned": "🚫 Вам запрещено использовать этого бота.",
+        "maintenance": "🔧 Бот на техническом обслуживании. Попробуйте позже.",
+        "unable_to_find": "400: Извините, не удалось найти. Попробуйте другой или сообщите в @itachi2129 или чат поддержки @spotify_supportbot 🤖",
+        "support_message": "Посмотрите @z_downloadbot (музыка) @spotifynewss (канал) \n Пожалуйста, поддержите нас через /donate, чтобы поддерживать этот проект",
+    },
+    "ar": {
+        "start_download": "🎧 يتم تنزيل طلبك... يرجى الانتظار!",
+        "download_complete": "✅ تم اكتمال التنزيل! استمتع بموسيقاك.",
+        "error": "❌ عذرًا، حدث خطأ. يرجى المحاولة مرة أخرى أو الإبلاغ عن المشكلة.",
+        "banned": "🚫 أنت محظور من استخدام هذا البوت.",
+        "maintenance": "🔧 البوت تحت الصيانة. يرجى المحاولة لاحقًا.",
+        "unable_to_find": "400: عذرًا، لم أتمكن من العثور عليه. حاول تجربة آخر أو أبلغ عنه إلى @itachi2129 أو دعم الدردشة @spotify_supportbot 🤖",
+        "support_message": "تحقق من @z_downloadbot (الموسيقى) @spotifynewss (القناة) \n يرجى دعمنا عن طريق /donate للحفاظ على هذا المشروع",
+    },
+    "hi": {
+        "start_download": "🎧 आपका अनुरोध डाउनलोड हो रहा है... कृपया प्रतीक्षा करें!",
+        "download_complete": "✅ डाउनलोड पूरा हुआ! अपने संगीत का आनंद लें।",
+        "error": "❌ क्षमा करें, एक त्रुटि हुई। कृपया पुनः प्रयास करें या इस समस्या की रिपोर्ट करें।",
+        "banned": "🚫 आपको इस बॉट के उपयोग से प्रतिबंधित किया गया है।",
+        "maintenance": "🔧 बॉट का रखरखाव किया जा रहा है। कृपया बाद में प्रयास करें।",
+        "unable_to_find": "400: क्षमा करें, इसे खोज नहीं सका। किसी अन्य को आज़माएं या इसे @itachi2129 या समर्थन चैट @spotify_supportbot 🤖 को रिपोर्ट करें।",
+        "support_message": "@z_downloadbot (संगीत) @spotifynewss (चैनल) देखें \n कृपया इस प्रोजेक्ट को बनाए रखने के लिए /donate के माध्यम से हमारा समर्थन करें",
+    },
+}
+
+SPOTIFY_RESPONSES = {
     "en": {
         "start_download": "🎧 Downloading your request... Please wait!",
         "download_complete": "✅ Download complete! Enjoy your music.",
@@ -50,8 +174,7 @@ TWITTER_RESPONSES = {
         "album": "💽 Album",
         "release_year": "🗓 Release Year",
         "image": "IMAGE",
-        "track_id": "Track ID",
-        "INVALID_LINK": "Oops Invalid link or Media Is Not Available:)"
+        "track_id": "Track ID"
     },
     "fa": {
         "start_download": "🎧 درخواست شما در حال دانلود... لطفا منتظر بمانید!",
@@ -73,8 +196,7 @@ TWITTER_RESPONSES = {
         "album": "💽 آلبوم",
         "release_year": "🗓 سال انتشار",
         "image": "تصویر",
-        "track_id": "شناسه آهنگ",
-        "INVALID_LINK": "اوه پیوند نامعتبر یا رسانه موجود نیست:)"
+        "track_id": "شناسه آهنگ"
     },
     "es": {
         "start_download": "🎧 Descargando tu solicitud... ¡Por favor espera!",
@@ -94,8 +216,7 @@ TWITTER_RESPONSES = {
         "album": "💽 Álbum",
         "release_year": "🗓 Año de lanzamiento",
         "image": "IMAGEN",
-        "track_id": "ID de pista",
-        "INVALID_LINK": "¡Ups! Enlace no válido o el medio no está disponible:)"
+        "track_id": "ID de pista"
     },
     "ru": {
         "start_download": "🎧 Загружается ваш запрос... Пожалуйста, подождите!",
@@ -115,8 +236,7 @@ TWITTER_RESPONSES = {
         "album": "💽 Альбом",
         "release_year": "🗓 Год выпуска",
         "image": "ИЗОБРАЖЕНИЕ",
-        "track_id": "ID трека",
-        "INVALID_LINK": "Упс, неверная ссылка или медиафайл недоступен:)"
+        "track_id": "ID трека"
     },
 
     "ar": {
@@ -137,8 +257,7 @@ TWITTER_RESPONSES = {
         "album": "💽 الألبوم",
         "release_year": "🗓 سنة الإصدار",
         "image": "صورة",
-        "track_id": "معرف المسار",
-        "INVALID_LINK": "عفواً، الرابط غير صالح أو الوسائط غير متوفرة:)"
+        "track_id": "معرف المسار"
     },
     "hi": {
         "start_download": "🎧 आपका अनुरोध डाउनलोड हो रहा है... कृपया प्रतीक्षा करें!",
@@ -158,8 +277,7 @@ TWITTER_RESPONSES = {
         "album": "💽 एल्बम",
         "release_year": "🗓 रिलीज़ वर्ष",
         "image": "छवि",
-        "track_id": "ट्रैक आईडी",
-        "INVALID_LINK": "ओह, अमान्य लिंक या मीडिया उपलब्ध नहीं है:)"
+        "track_id": "ट्रैक आईडी"
     },
 }
 
@@ -178,19 +296,7 @@ LANGUAGE_STRINGS = {
         "followers": "Followers",
         "total_tracks": "Total Tracks",
         "valid_playlist_question": "Are you sure it's a valid playlist? 🤨",
-        "valid_song_question": "are you sure it's a valid song 🤨?",
-        "start_download": "🎧 Downloading your request... Please wait!",
-        "download_complete": "✅ Download complete! Enjoy your music.",
-        "error": "❌ Sorry, an error occurred. Please try again or report this issue.",
-        "banned": "🚫 You are banned from using this bot.",
-        "maintenance": "🔧 The bot is under maintenance. Please try again later.",
-        "invalid_link": "⚠️ Are you sure this is a valid Twitter link?",
-        "track_not_found": "⚠️ Track not found. Please try another link.",
-        "thumbnail_error": "⚠️ Thumbnail download is not available for this track.",
-        "preview_error": "⚠️ Audio preview is not available for this track.",
-        "Under": "Bot Is Under Maintenance ⚠️",
-        "Done": "Check out @z_downloadbot(music)  @Zpotify1(Channel) Please support us by /donate to maintain this project.",
-        "INVALID_LINK": "Oops Invalid link or Media Is Not Available:)"
+        "valid_song_question": "are you sure it's a valid song 🤨?"
 
     },
     "fa": {  # Persian (Farsi)
@@ -207,18 +313,7 @@ LANGUAGE_STRINGS = {
         "followers": "دنبال کنندگان",
         "total_tracks": "تعداد ترک‌ها",
         "valid_playlist_question": "آیا مطمئن هستید که این یک لیست پخش معتبر است؟ 🤨",
-        "valid_song_question": "آیا مطمئن هستید که آهنگ معتبری است؟ 🤨",
-        "start_download": "🎧 درخواست شما در حال دانلود... لطفا منتظر بمانید!",
-        "download_complete": "✅ دانلود کامل شد! از موسیقی خود لذت ببرید.",
-        "error": "❌ متاسفانه خطایی رخ داد. لطفا دوباره امتحان کنید یا مشکل را گزارش دهید.",
-        "banned": "🚫 شما از استفاده از این ربات محروم شده‌اید.",
-        "maintenance": "🔧 ربات در حال تعمیر و نگهداری است. لطفا بعدا تلاش کنید.",
-        "invalid_link": "⚠️ آیا مطمئن هستید که این لینک معتبر است؟",
-        "track_not_found": "⚠️ آهنگ پیدا نشد. لطفا لینک دیگری را امتحان کنید.",
-        "thumbnail_error": "⚠️ دانلود تصویر برای این آهنگ امکان‌پذیر نیست.",
-        "preview_error": "⚠️ پیش‌نمایش صوتی برای این آهنگ موجود نیست.",
-        "Done": "Done✅",
-        "INVALID_LINK": "اوه پیوند نامعتبر یا رسانه موجود نیست:) "
+        "valid_song_question": "آیا مطمئن هستید که آهنگ معتبری است؟ 🤨"
     },
     "es": {  # Spanish
         "title": "🎧 Título",
@@ -234,19 +329,7 @@ LANGUAGE_STRINGS = {
         "followers": "Seguidores",
         "total_tracks": "Total de pistas",
         "valid_playlist_question": "¿Estás seguro de que es una lista de reproducción válida? 🤨",
-        "valid_song_question": "¿Estás segura de que es una canción válida 🤨?",
-        "start_download": "🎧 Descargando tu solicitud... ¡Por favor espera!",
-        "download_complete": "✅ ¡Descarga completa! Disfruta de tu música.",
-        "error": "❌ Lo sentimos, ocurrió un error. Por favor, inténtalo de nuevo o informa este problema.",
-        "banned": "🚫 Estás prohibido de usar este bot.",
-        "maintenance": "🔧 El bot está en mantenimiento. Por favor, inténtalo de nuevo más tarde.",
-        "invalid_link": "⚠️ ¿Estás seguro de que este es un enlace válido de Twitter?",
-        "track_not_found": "⚠️ Canción no encontrada. Por favor, prueba con otro enlace.",
-        "thumbnail_error": "⚠️ La descarga de la miniatura no está disponible para esta canción.",
-        "preview_error": "⚠️ La vista previa de audio no está disponible para esta canción.",
-        "Under": "El bot está en mantenimiento ⚠️",
-        "Done": "Mira @z_downloadbot (música) y @Zpotify1 (canal). Por favor, apóyanos con /donate para mantener este proyecto.",
-        "INVALID_LINK": "¡Ups! Enlace inválido o el medio no está disponible :)"
+        "valid_song_question": "¿Estás segura de que es una canción válida 🤨?"
 
     },
     "ru": {  # Russian
@@ -263,21 +346,8 @@ LANGUAGE_STRINGS = {
         "followers": "Подписчики",
         "total_tracks": "Всего треков",
         "valid_playlist_question": "¿Я уверен, что список воспроизведений действителен? 🤨",
-        "valid_song_question": "вы уверены, что это допустимая песня 🤨?",
-        "start_download": "🎧 Ваш запрос загружается... Пожалуйста, подождите!",
-        "download_complete": "✅ Загрузка завершена! Наслаждайтесь своей музыкой.",
-        "error": "❌ Извините, произошла ошибка. Пожалуйста, попробуйте снова или сообщите об этой проблеме.",
-        "banned": "🚫 Вам запрещено использовать этого бота.",
-        "maintenance": "🔧 Бот находится на техническом обслуживании. Пожалуйста, попробуйте позже.",
-        "invalid_link": "⚠️ Вы уверены, что это действительная ссылка на Twitter?",
-        "track_not_found": "⚠️ Трек не найден. Пожалуйста, попробуйте другую ссылку.",
-        "thumbnail_error": "⚠️ Загрузка миниатюры для этого трека недоступна.",
-        "preview_error": "⚠️ Аудиопревью для этого трека недоступно.",
-        "Under": "Бот на техническом обслуживании ⚠️",
-        "Done": "Проверьте @z_downloadbot (музыка) и @Zpotify1 (канал). Пожалуйста, поддержите нас через /donate, чтобы поддерживать этот проект.",
-        "INVALID_LINK": "Упс! Неверная ссылка или медиа недоступно :)"
+        "valid_song_question": "вы уверены, что это допустимая песня 🤨?"
     },
-    
     "ar": {  # Arabic
         "title": "🎧 العنوان",
         "artist": "🎤 الفنان",
@@ -292,19 +362,8 @@ LANGUAGE_STRINGS = {
         "followers": "المتابعون",
         "total_tracks": "إجمالي المسارات",
         "valid_playlist_question": "هل من المؤكد أنها قائمة إعادة إنتاج صالحة؟ 🤨",
-        "valid_song_question": "هل أنت متأكد من أن هذه أغنية صالحة 🤨؟",
-        "start_download": "🎧 جارٍ تنزيل طلبك... الرجاء الانتظار!",
-        "download_complete": "✅ اكتمل التنزيل! استمتع بموسيقاك.",
-        "error": "❌ عذرًا، حدث خطأ. يرجى المحاولة مرة أخرى أو الإبلاغ عن هذه المشكلة.",
-        "banned": "🚫 أنت محظور من استخدام هذا البوت.",
-        "maintenance": "🔧 البوت قيد الصيانة. يرجى المحاولة مرة أخرى لاحقًا.",
-        "invalid_link": "⚠️ هل أنت متأكد أن هذا رابط تويتر صالح؟",
-        "track_not_found": "⚠️ لم يتم العثور على المقطع. يرجى تجربة رابط آخر.",
-        "thumbnail_error": "⚠️ تنزيل الصورة المصغرة غير متاح لهذا المقطع.",
-        "preview_error": "⚠️ معاينة الصوت غير متاحة لهذا المقطع.",
-        "Under": "البوت قيد الصيانة ⚠️",
-        "Done": "تحقق من @z_downloadbot (موسيقى) و @Zpotify1 (قناة). يرجى دعمنا عبر /donate للحفاظ على هذا المشروع.",
-        "INVALID_LINK": "عذرًا! الرابط غير صالح أو الوسائط غير متوفرة :)"
+        "valid_song_question": "هل أنت متأكد من أن هذه أغنية صالحة 🤨؟"
+
     },
     "hi": {  # Hindi
         "title": "🎧 शीर्षक",
@@ -320,84 +379,6 @@ LANGUAGE_STRINGS = {
         "followers": "फॉलोअर्स",
         "total_tracks": "कुल गाने",
         "valid_playlist_question": "¿क्या आप वैध पुनरुत्पादन सूची तैयार कर सकते हैं? 🤨",
-        "valid_song_question": "क्या आप सुनिश्चित हैं कि यह एक वैध गीत है 🤨?",
-        "start_download": "🎧 आपका अनुरोध डाउनलोड किया जा रहा है... कृपया प्रतीक्षा करें!",
-        "download_complete": "✅ डाउनलोड पूरा हो गया! अपने संगीत का आनंद लें।",
-        "error": "❌ क्षमा करें, एक त्रुटि हुई। कृपया पुनः प्रयास करें या इस समस्या की रिपोर्ट करें।",
-        "banned": "🚫 आपको इस बॉट का उपयोग करने से प्रतिबंधित किया गया है।",
-        "maintenance": "🔧 बॉट रखरखाव के अधीन है। कृपया बाद में पुनः प्रयास करें।",
-        "invalid_link": "⚠️ क्या आप सुनिश्चित हैं कि यह एक वैध ट्विटर लिंक है?",
-        "track_not_found": "⚠️ ट्रैक नहीं मिला। कृपया कोई अन्य लिंक आज़माएं।",
-        "thumbnail_error": "⚠️ इस ट्रैक के लिए थंबनेल डाउनलोड उपलब्ध नहीं है।",
-        "preview_error": "⚠️ इस ट्रैक के लिए ऑडियो पूर्वावलोकन उपलब्ध नहीं है।",
-        "Under": "बॉट रखरखाव के अधीन है ⚠️",
-        "Done": "@z_downloadbot (संगीत) और @Zpotify1 (चैनल) देखें। कृपया इस प्रोजेक्ट को बनाए रखने के लिए /donate के माध्यम से हमारा समर्थन करें।",
-        "INVALID_LINK": "उफ़! अमान्य लिंक या मीडिया उपलब्ध नहीं है :)"
+        "valid_song_question": "क्या आप सुनिश्चित हैं कि यह एक वैध गीत है 🤨?"
     }
 }
-
-@Mbot.on_message(filters.regex(r'https?://.*twitter[^\s]+') & filters.incoming | filters.regex(r'https?://(?:www\.)?x\.com/\S+') & filters.incoming,group=-5)
-async def twitter_handler(Mbot, message):
-    
-   user_lang = get_user_language(message.from_user.id)  # Fetch user language from your function
-   strings = LANGUAGE_STRINGS.get(user_lang, LANGUAGE_STRINGS["en"])  # Default to English if not found
-
-   if is_maintenance_mode() and message.from_user.id not in SUDO_USERS:
-        await message.reply_text(TWITTER_RESPONSES.get(user_lang, {}).get("maintenance","🔧 The bot is under maintenance. Please try again later."))
-        return
-   
-   # Check Banned Users
-   if message.from_user.id in banned_users:
-        await message.reply_text(TWITTER_RESPONSES.get(user_lang, {}).get("banned","You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) "))
-        return
-
-   try:            
-      link=message.matches[0].group(0)
-      if "x.com" in link:
-         link=link.replace("x.com","fxtwitter.com")
-      elif "twitter.com" in link:
-         link = link.replace("twitter.com","fxtwitter.com")
-      m=await message.reply_sticker("CAACAgIAAxkBATWhF2Qz1Y-FKIKqlw88oYgN8N82FtC8AAJnAAPb234AAT3fFO9hR5GfHgQ")
-      try:
-            dump_file = await message.reply_video(link, caption=strings["start_download"])
-      except Exception as e:
-          print(e)
-          try:
-             snd_message=await message.reply(link)
-             await asyncio.sleep(1)
-             dump_file = await message.reply_video(link,caption="Thank you for using - @z_downloadbot")
-             await snd_message.delete()
-          except Exception as e:
-              print(e)
-              await snd_message.delete()
-              get_api=requests.get(link).text
-              soup=bs4.BeautifulSoup(get_api,"html.parser")
-              meta_tag= soup.find("meta", attrs = {"property": "og:video"})
-              if not meta_tag:
-                  meta_tag = soup.find("meta", attrs={"property": "og:image"})
-              content_value  = meta_tag['content']
-              try:
-                 dump_file = await message.reply_video(content_value, caption=strings["start_download"])
-              except Exception as e:
-                  print(e)
-                  try:
-                     snd_msg=await message.reply(content_value)
-                     await asyncio.sleep(1)
-                     await message.reply_video(content_value, caption=strings["start_download"])
-                     await snd_msg.delete()
-                  except Exception as e:
-                      print(e)
-                      await message.reply(strings["INVALID_LINK"])
-   except Exception as e:
-        print(e)
-        if LOG_GROUP:
-           await Mbot.send_message(LOG_GROUP,e)
-           await Mbot.send_message(LOG_GROUP,traceback.format_exc())
-   finally:
-       if DUMP_GROUP:
-          if "dump_file" in locals():
-             await dump_file.copy(DUMP_GROUP)
-       await m.delete()
-       await message.reply(strings["Done"])
-                  
-    
