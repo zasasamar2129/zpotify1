@@ -1227,17 +1227,12 @@ async def set_user_language(client, callback_query):
     
     await callback_query.message.edit_text("👤 Set User Language:\nPlease enter the user ID and the language code (e.g., '123456789 en').")
 
-@Mbot.on_message(filters.text & filters.user(SUDO_USERS))
+@Mbot.on_message(filters.text & filters.user(SUDO_USERS) & filters.regex(r'^\d+\s+\w{2}$'))
 async def handle_user_language_setting(client, message):
-    if message.text.startswith("/"):
-        return  # Ignore commands
-    
     try:
         user_id, lang_code = message.text.split()
         user_id = int(user_id)
         lang_code = lang_code.lower()
-        
-        return
         
         # Save the user's language preference
         user_languages = load_user_languages()
