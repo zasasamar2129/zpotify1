@@ -182,8 +182,9 @@ async def _(Mbot,message):
     "total_tracks": "Total Tracks",
     "valid_playlist_question": "Are you sure it's a valid playlist? 🤨",
     "valid_song_question": "Are you sure it's a valid song? 🤨",
-    "photo_caption": "🎧 Title : {0}\n🎤 Artist : {1}\n💽 Track No : {2}\n💽 Total Track : {3}",
-    "audio_caption": "[{0}](https://youtu.be/{1}) - {2} Thank you for using - @z_downloadbot"
+    "photo_caption": "🎧 Title: {title}\n🎤 Artist: {artist}\n💽 Track No: {track_no}\n💽 Total Tracks: {total_tracks}",
+    "audio_caption": "[{title}](https://youtu.be/{video_id}) - {artist} Thank you for using - @z_downloadbot"
+
   },
   "fa": {
     "start_download": "🎧 درخواست شما در حال دانلود... لطفا منتظر بمانید!",
@@ -207,8 +208,9 @@ async def _(Mbot,message):
     "total_tracks": "تعداد ترک‌ها",
     "valid_playlist_question": "آیا مطمئن هستید که این یک لیست پخش معتبر است؟ 🤨",
     "valid_song_question": "آیا مطمئن هستید که آهنگ معتبری است؟ 🤨",
-    "photo_caption": "🎧 عنوان : {0}\n🎤 هنرمند : {1}\n💽 شماره ترک : {2}\n💽 تعداد کل ترک‌ها : {3}",
-    "audio_caption": "[{0}](https://youtu.be/{1}) - {2} با تشکر از استفاده شما - @z_downloadbot"
+    "photo_caption": "🎧 عنوان: {title}\n🎤 هنرمند: {artist}\n💽 شماره ترک: {track_no}\n💽 تعداد کل ترک‌ها: {total_tracks}",
+    "audio_caption": "[{title}](https://youtu.be/{video_id}) - {artist} با تشکر از استفاده شما - @z_downloadbot"
+
   },
   "es": {
     "start_download": "🎧 Descargando tu solicitud... ¡Por favor espera!",
@@ -232,8 +234,9 @@ async def _(Mbot,message):
     "total_tracks": "Total de pistas",
     "valid_playlist_question": "¿Estás seguro de que es una lista de reproducción válida? 🤨",
     "valid_song_question": "¿Estás segura de que es una canción válida? 🤨",
-    "photo_caption": "🎧 Título : {0}\n🎤 Artista : {1}\n💽 Número de pista : {2}\n💽 Total de pistas : {3}",
-    "audio_caption": "[{0}](https://youtu.be/{1}) - {2} Gracias por usar - @z_downloadbot"
+    "photo_caption": "🎧 Título: {title}\n🎤 Artista: {artist}\n💽 Número de pista: {track_no}\n💽 Total de pistas: {total_tracks}",
+    "audio_caption": "[{title}](https://youtu.be/{video_id}) - {artist} Gracias por usar - @z_downloadbot"
+
   },
   "ru": {
     "start_download": "🎧 Загружается ваш запрос... Пожалуйста, подождите!",
@@ -257,8 +260,9 @@ async def _(Mbot,message):
     "total_tracks": "Всего треков",
     "valid_playlist_question": "Вы уверены, что это действительный плейлист? 🤨",
     "valid_song_question": "Вы уверены, что это действительная песня? 🤨",
-    "photo_caption": "🎧 Название : {0}\n🎤 Исполнитель : {1}\n💽 Номер трека : {2}\n💽 Всего треков : {3}",
-    "audio_caption": "[{0}](https://youtu.be/{1}) - {2} Спасибо за использование - @z_downloadbot"
+    "photo_caption": "🎧 Название: {title}\n🎤 Исполнитель: {artist}\n💽 Номер трека: {track_no}\n💽 Всего треков: {total_tracks}",
+    "audio_caption": "[{title}](https://youtu.be/{video_id}) - {artist} Спасибо за использование - @z_downloadbot"
+
   },
   "ar": {
     "start_download": "🎧 يتم تنزيل طلبك... يرجى الانتظار!",
@@ -282,8 +286,9 @@ async def _(Mbot,message):
     "total_tracks": "إجمالي المسارات",
     "valid_playlist_question": "هل من المؤكد أنها قائمة إعادة إنتاج صالحة؟ 🤨",
     "valid_song_question": "هل أنت متأكد من أن هذه أغنية صالحة؟ 🤨",
-    "photo_caption": "🎧 العنوان : {0}\n🎤 الفنان : {1}\n💽 رقم المسار : {2}\n💽 إجمالي المسارات : {3}",
-    "audio_caption": "[{0}](https://youtu.be/{1}) - {2} شكرًا لاستخدامك - @z_downloadbot"
+    "photo_caption": "🎧 العنوان: {title}\n🎤 الفنان: {artist}\n💽 رقم المسار: {track_no}\n💽 إجمالي المسارات: {total_tracks}",
+    "audio_caption": "[{title}](https://youtu.be/{video_id}) - {artist} شكرًا لاستخدامك - @z_downloadbot"
+
   },
   "hi": {
     "start_download": "🎧 आपका अनुरोध डाउनलोड हो रहा है... कृपया प्रतीक्षा करें!",
@@ -307,8 +312,9 @@ async def _(Mbot,message):
     "total_tracks": "कुल गाने",
     "valid_playlist_question": "क्या आप सुनिश्चित हैं कि यह एक वैध प्लेलिस्ट है? 🤨",
     "valid_song_question": "क्या आप सुनिश्चित हैं कि यह एक वैध गीत है? 🤨",
-    "photo_caption": "🎧 शीर्षक : {0}\n🎤 कलाकार : {1}\n💽 ट्रैक नंबर : {2}\n💽 कुल ट्रैक : {3}",
-    "audio_caption": "[{0}](https://youtu.be/{1}) - {2} उपयोग करने के लिए धन्यवाद - @z_downloadbot"
+    "photo_caption": "🎧 शीर्षक: {title}\n🎤 कलाकार: {artist}\n💽 ट्रैक नंबर: {track_no}\n💽 कुल ट्रैक: {total_tracks}",
+    "audio_caption": "[{title}](https://youtu.be/{video_id}) - {artist} उपयोग करने के लिए धन्यवाद - @z_downloadbot"
+
   }
 }
 
@@ -364,11 +370,29 @@ async def _(Mbot,message):
         for id in ids:
   #          await message.reply(id)
   #          await message.reply(id[2])
-            PForCopy = await message.reply_photo(f"https://i.ytimg.com/vi/{id[0]}/hqdefault.jpg",caption=YT_RESPONSES.get(user_lang, {}).get("photo_caption", f"🎧 Title : {id[3]}\n🎤 Artist : {id[2]}\n💽 Track No : {id[1]}\n💽 Total Track : {videoInPlaylist}"))
+            PForCopy = await message.reply_photo(
+    f"https://i.ytimg.com/vi/{id[0]}/hqdefault.jpg",
+    caption=YT_RESPONSES.get(user_lang, {}).get("photo_caption", "").format(
+    title=id[3], artist=id[2], track_no=id[1], total_tracks=videoInPlaylist
+)
+            )
+
             fileLink = await ytdl_down(randomdir, id, message.from_user.id)
             print("down completely")
-            thumnail = await thumb_down(id[0])
-            AForCopy = await message.reply_audio(fileLink, caption=YT_RESPONSES.get(user_lang, {}).get("audio_caption", f"[{id[3]}](https://youtu.be/{id[0]}) - {id[2]} Thank you for using - @z_downloadbot"), title=id[3].replace("_", " "), performer=id[2], thumb=thumnail, duration=id[4])
+            thumbnail = await thumb_down(id[0])
+
+            AForCopy = await message.reply_audio(
+    fileLink,
+    caption=YT_RESPONSES.get(user_lang, {}).get("audio_caption", "").format(
+    title=id[3], video_id=id[0], artist=id[2]
+)
+,
+    title=id[3].replace("_", " "),
+    performer=id[2],
+    thumb=thumbnail,
+    duration=id[4]
+)
+
             if DUMP_GROUP:
                 await PForCopy.copy(DUMP_GROUP)
                 await AForCopy.copy(DUMP_GROUP)
