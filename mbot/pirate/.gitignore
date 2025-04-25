@@ -1,0 +1,57 @@
+
+
+# Downloaded media
+downloads/
+downloads/**/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+bin/
+include/
+share/
+
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.env
+
+# Logs and databases
+*.log
+download_history.json
+*.sqlite
+*.db
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+.cache
