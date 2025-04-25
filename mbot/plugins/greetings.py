@@ -127,7 +127,7 @@ def maintenance_check(handler):
         # Load the latest maintenance status
         global maintenance_mode
         maintenance_mode = load_maintenance_status()
-        
+        user_lang = get_user_language(message.from_user.id)
         if maintenance_mode and message.from_user.id not in SUDO_USERS:
             await message.reply_text(GREET_RESPONSES.get(user_lang, {}).get("maintenance","🔧 The bot is under maintenance. Please try again later."))
             return
@@ -513,77 +513,90 @@ async def send_log(_, message):
     await message.delete()
     await message.reply_document("bot.log")
 
-@Mbot.on_message(filters.command("cpu"))
+@Mbot.on_message(filters.command("cpu") & filters.chat(SUDO_USERS))
 async def cpu_usage(_, message):
     await message.delete()
     cpu_percent = psutil.cpu_percent(interval=1)
-    await message.reply_text(GREET_RESPONSES.get(user_lang, {}).get("cpu_usage", "**CPU Usage:** `{cpu_percent}%`"))
+    await message.reply_text(f"**CPU Usage:** `{cpu_percent}%`")
 
 
 @Mbot.on_message(filters.command("ping"))
 @maintenance_check
 async def ping(client, message):
     if message.from_user.id in banned_users:
-        await message.reply_text(GREET_RESPONSES.get(user_lang, {}).get("banned", "You are banned from using this bot  😢"))
-
+        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) .")
         return
     start = datetime.now()
     await client.invoke(Ping(ping_id=0))
     ms = (datetime.now() - start).microseconds / 1000
-    await message.reply_text(GREET_RESPONSES.get(user_lang, {}).get("pong", "**Pong!**\nResponse time: `{ms} ms`"))
+    await message.reply_text(f"**Pong!**\nResponse time: `{ms} ms`")
 
 @Mbot.on_message(filters.command("donate"))
 @maintenance_check
 async def donate(_, message):
+    user_lang = get_user_language(message.from_user.id)
     if message.from_user.id in banned_users:
         await message.reply_text(GREET_RESPONSES.get(user_lang, {}).get("banned","You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) "))
         return
+    
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("Donate", url="https://www.buymeacoffee.com/zasasamar")],
         [InlineKeyboardButton(text="❌", callback_data="close")]
     ])
-    await message.reply_text(GREET_RESPONSES.get(user_lang, {}).get("donate", "If you would like to support the development of this bot, you can donate here:", reply_markup=keyboard))
-
+    
+    # Get the donation text first, then pass it to reply_text with the keyboard
+    donate_text = GREET_RESPONSES.get(user_lang, {}).get(
+        "donate", 
+        "If you would like to support the development of this bot, you can donate here:"
+    )
+    
+    await message.reply_text(donate_text, reply_markup=keyboard)
+    
 @Mbot.on_message(filters.command("info"))
 @maintenance_check
 async def info(_, message):
+    user_lang = get_user_language(message.from_user.id)
+
     if message.from_user.id in banned_users:
-        await message.reply_text(GREET_RESPONSES.get(user_lang, {}).get("banned","You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) "))
+        await message.reply_text(
+            GREET_RESPONSES.get(user_lang, {}).get("banned", "You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) ")
+        )
         return
-        user_lang = get_user_language(message.from_user.id)  # Function to get the user's language
-        responses = INFO_TEXT.get(user_lang, INFO_TEXT["en"])  # Default to English if language is not found
 
     info_text = (
-    "💢 **Hello! I am 𝓩𝓟𝓞𝓣𝓘𝓕𝓨** 💢\n\n"
-    "✨ **Here are the amazing things I can do for you:** ✨\n\n"
-    
-    "1️⃣ **Download Music from YouTube**\n"
-    "🎵 Send a YouTube link, and I will download the song for you.\n\n"
-    
-    "2️⃣ **Download Music from Spotify**\n"
-    "🎧 Send a Spotify track, playlist, album, show, or episode link, and I will download it for you.\n\n"
-    
-    "3️⃣ **Download Music from Deezer**\n"
-    "🎼 Send a Deezer playlist, album, or track link, and I will download it for you.\n\n"
-    
-    "4️⃣ **Download Music from SoundCloud**\n"
-    "🔊 Send a SoundCloud track link, and I will download it for you.\n\n"
-    
-    "5️⃣ **Download IG Reels**\n"
-    "📸 Send an Instagram link, and I will download the reel, post, or story for you.\n\n"
-    
-    "6️⃣ **Ping Command**\n"
-    "📡 Use the `/ping` command to check the bot's response time.\n\n"
-    
-    "7️⃣ **Help Command**\n"
-    "🛠️ Use the `/help` command to get detailed instructions on how to use the bot.\n\n"
-    
-    "8️⃣ **Donate**\n"
-    "💖 If you love the bot, you can support its development by donating.\n\n"
-    
-    "💢 **Feel free to explore and use the commands to get the best out of this bot!** 💢"
-)
-    await message.reply_text(INFO_TEXT.get(user_lang, {}).get(info_text))
+        "💢 **Hello! I am 𝓩𝓟𝓞𝓣𝓘𝓕𝓨** 💢\n\n"
+        "✨ **Here are the amazing things I can do for you:** ✨\n\n"
+
+        "1️⃣ **Download Music from YouTube**\n"
+        "🎵 Send a YouTube link, and I will download the song for you.\n\n"
+
+        "2️⃣ **Download Music from Spotify**\n"
+        "🎧 Send a Spotify track, playlist, album, show, or episode link, and I will download it for you.\n\n"
+
+        "3️⃣ **Download Music from Deezer**\n"
+        "🎼 Send a Deezer playlist, album, or track link, and I will download it for you.\n\n"
+
+        "4️⃣ **Download Music from SoundCloud**\n"
+        "🔊 Send a SoundCloud track link, and I will download it for you.\n\n"
+
+        "5️⃣ **Download IG Reels**\n"
+        "📸 Send an Instagram link, and I will download the reel, post, or story for you.\n\n"
+
+        "6️⃣ **Ping Command**\n"
+        "📡 Use the `/ping` command to check the bot's response time.\n\n"
+
+        "7️⃣ **Help Command**\n"
+        "🛠️ Use the `/help` command to get detailed instructions on how to use the bot.\n\n"
+
+        "8️⃣ **Donate**\n"
+        "💖 If you love the bot, you can support its development by donating.\n\n"
+
+        "💢 **Feel free to explore and use the commands to get the best out of this bot!** 💢"
+    )
+
+    await message.reply_text(INFO_TEXT.get(user_lang, INFO_TEXT["en"]))
+
+
 
 STATS_TEXT = {
 
@@ -761,20 +774,16 @@ STATS_TEXT = {
 @Mbot.on_message(filters.command("stats"))
 @maintenance_check
 async def stats(client, message):
-
-    user_lang = get_user_language(message.from_user.id)  # Fetch the user's preferred language
-    responses = STATS_TEXT.get(user_lang, STATS_TEXT["en"])  # Default to English if not found
-
     if message.from_user.id in banned_users:
-        await message.reply_text(GREET_RESPONSES.get(user_lang, {}).get("banned","You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) "))
+        await message.reply_text("You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) .")
         return
     # Initial reply with a placeholder message
-    fetching_message = await message.reply_text(GREET_RESPONSES.get(user_lang, {}).get("fetching_message", "Fetching stats...\n[                    ] 0%"))
+    fetching_message = await message.reply_text("Fetching stats...\n[                    ] 0%")
     
     # Simulate progress by updating the message incrementally
     for progress in range(0, 101, 10):
         bar = "█" * (progress // 10) + " " * (10 - (progress // 10))
-        await fetching_message.edit_text(GREET_RESPONSES.get(user_lang, {}).get(f"Fetching stats...\n[{bar}] {progress}%"))
+        await fetching_message.edit_text(f"Fetching stats...\n[{bar}] {progress}%")
         await sleep(0.5)  # Adjust sleep time to control animation speed
     
     # Gather system information
@@ -844,7 +853,8 @@ async def stats(client, message):
     f"🌟 **Users Who Enjoyed Premium Trials and Plans:** {total_premium_trials}\n"
 )
     await fetching_message.delete()
-    await message.reply_text(STATS_TEXT.get(user_lang, {}).get(stats_text))
+    await message.reply_text(stats_text)
+
 
     
 
@@ -1672,7 +1682,7 @@ async def send_user_list(client, callback_query):
     f"   ───────────────────────────"  # Separator line
     for u in user_details
 ])
-
+        await callback_query.message.delete()
         await callback_query.message.reply_text(
         f"<b>🗄️ User List:</b>\n\n{user_list_text}",
         
