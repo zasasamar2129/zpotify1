@@ -27,17 +27,20 @@ ZPOTIFY is a powerful and open-source Spotify downloader bot designed for Telegr
    sudo apt update && sudo apt upgrade -y
    sudo apt install git ffmpeg python3 python3-pip -y
    ```
-2. **Clone Repository:**
+2. **Clone Repository & Install Requirements:**
    ```bash
    git clone https://github.com/zasasamar2129/zpotify1.git
    cd zpotify1
+   pip3 install -r requirements.txt
    ```
-3. **Install Requirements:**
+3. **Install Requirements 2:**
    ```bash
+   cd /mbot/pirate
    pip3 install -r requirements.txt
    ```
 4. **Run the Bot:**
    ```bash
+   cd ../../
    python3 -m mbot
    ```
 
