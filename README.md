@@ -35,7 +35,7 @@ ZPOTIFY is a powerful and open-source Spotify downloader bot designed for Telegr
    ```
 3. **Install Requirements 2:**
    ```bash
-   cd /mbot/pirate
+   cd mbot/pirate
    pip3 install -r requirements.txt
    ```
 4. **Run the Bot:**
