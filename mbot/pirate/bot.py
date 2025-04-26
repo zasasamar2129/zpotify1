@@ -118,8 +118,8 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
             result = await reddit_dl.download_post(url)
         elif platform == 'pinterest':
             result = await pinterest_dl.download_pin(url)
-        elif platform == 'spotify':
-            result = await spotify_dl.download_track(url)
+        #elif platform == 'spotify':
+            #result = await spotify_dl.download_track(url)
 
         if not result or not result.get('success'):
             error_msg = result.get('error', 'Unknown error') if result else 'Download failed'
