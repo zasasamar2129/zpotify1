@@ -14,6 +14,11 @@ from mbot.utils.util import save_maintenance_status
 from mbot.utils.language_utils import get_user_language
 import asyncio
 from pyrogram.types import BotCommand
+import subprocess
+from typing import Optional
+
+# Global variable to store the subprocess reference
+bot_process: Optional[subprocess.Popen] = None
 
 MAINTENANCE_FILE = "maintenance_status.json"
 BAN_LIST_FILE = "banned_users.json"
@@ -223,21 +228,48 @@ async def shutdown(_, message):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await message.reply_text("( •᷄ᴗ•́) Are you sure you want to shut down the bot?", reply_markup=reply_markup)
 
+import os
+import signal
+import subprocess
+from typing import Optional
+
+# Global variable to store the subprocess reference
+bot_process: Optional[subprocess.Popen] = None
+
+def terminate_bot_process():
+    global bot_process
+    if bot_process:
+        try:
+            # Get the process group ID
+            pgid = os.getpgid(bot_process.pid)
+            # Send signal to entire process group
+            os.killpg(pgid, signal.SIGTERM)
+            bot_process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            os.killpg(pgid, signal.SIGKILL)
+        except Exception as e:
+            print(f"Error killing process: {e}")
+        finally:
+            bot_process = None
+
 @Mbot.on_callback_query(filters.regex(r"shutdown_(yes|no)"))
 async def handle_shutdown_query(_, callback_query):
     if callback_query.data == "shutdown_yes":
         await callback_query.message.delete()
-        await callback_query.answer("🔌Shutting down bot...", show_alert=True)
-
-        # Shutdown the bot by stopping the event loop
-        await os._exit(0)
-
-    
-
+        await callback_query.answer("🔌 Full shutdown initiated...", show_alert=True)
+        
+        # Terminate subprocess
+        terminate_bot_process()
+        
+        # Clear terminal
+        os.system('clear' if os.name == 'posix' else 'cls')
+        
+        # Shutdown main process
+        os.kill(os.getpid(), signal.SIGTERM)
+        
     elif callback_query.data == "shutdown_no":
-        await callback_query.answer("Bot shutdown has been cancelled.", show_alert=True)
+        await callback_query.answer("Shutdown cancelled", show_alert=True)
         await callback_query.message.delete()
-
 
 from mbot.utils.language_utils import (
     load_user_languages,
@@ -1407,19 +1439,48 @@ async def handle_restart_query(_, callback_query):
         await callback_query.answer("Bot restart has been cancelled.", show_alert=True)
         await callback_query.message.delete()
 
-# Handle the shutdown confirmation
+import os
+import signal
+import subprocess
+from typing import Optional
+
+# Global variable to store the subprocess reference
+bot_process: Optional[subprocess.Popen] = None
+
+def terminate_bot_process():
+    global bot_process
+    if bot_process:
+        try:
+            # Get the process group ID
+            pgid = os.getpgid(bot_process.pid)
+            # Send signal to entire process group
+            os.killpg(pgid, signal.SIGTERM)
+            bot_process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            os.killpg(pgid, signal.SIGKILL)
+        except Exception as e:
+            print(f"Error killing process: {e}")
+        finally:
+            bot_process = None
+
 @Mbot.on_callback_query(filters.regex(r"shutdown_(yes|no)"))
 async def handle_shutdown_query(_, callback_query):
     if callback_query.data == "shutdown_yes":
         await callback_query.message.delete()
-        await callback_query.answer("🔌 Shutting down bot...", show_alert=True)
-
-        # Shutdown the bot by stopping the event loop
-        await os._exit(0)
+        await callback_query.answer("🔌 Full shutdown initiated...", show_alert=True)
+        
+        # Terminate subprocess
+        terminate_bot_process()
+        
+        # Clear terminal
+        os.system('clear' if os.name == 'posix' else 'cls')
+        
+        # Shutdown main process
+        os.kill(os.getpid(), signal.SIGTERM)
+        
     elif callback_query.data == "shutdown_no":
-        await callback_query.answer("Bot shutdown has been cancelled.", show_alert=True)
+        await callback_query.answer("Shutdown cancelled", show_alert=True)
         await callback_query.message.delete()
-
 
 
 #################################################################################################
