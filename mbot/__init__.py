@@ -37,6 +37,19 @@ from dotenv import load_dotenv
 import shutil 
 load_dotenv("config.env")
 import os 
+
+from pyrogram import utils
+
+def get_peer_type_new(peer_id: int) -> str:
+    peer_id_str = str(peer_id)
+    if not peer_id_str.startswith("-"):
+        return "user"
+    elif peer_id_str.startswith("-100"):
+        return "channel"
+    else:
+        return "chat"
+
+utils.get_peer_type = get_peer_type_new
 # Log
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(message)s",
@@ -55,9 +68,10 @@ except KeyError:
     LOGGER.debug("One or More ENV variable not found.")
     sys.exit(1)
 # Optional Variable
+# Optional Variable
 F_SUB = environ.get('F_SUB',False)
-F_SUB_CHANNEL_ID = environ.get('F_SUB_CHANNEL_ID')
-F_SUB_CHANNEL_INVITE_LINK = environ.get('F_SUB_CHANNEL_INVITE_LINK')
+F_SUB_CHANNEL_IDS = environ.get('F_SUB_CHANNEL_IDS', '').split(',')
+F_SUB_CHANNEL_INVITE_LINKS = environ.get('F_SUB_CHANNEL_INVITE_LINKS', '').split(',')
 SUDO_USERS = environ.get("SUDO_USERS",str(OWNER_ID)).split()
 SUDO_USERS = [int(_x) for _x in SUDO_USERS]
 if OWNER_ID not in SUDO_USERS:

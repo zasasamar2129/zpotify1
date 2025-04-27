@@ -16,7 +16,7 @@ from pyrogram.types import CallbackQuery, Message
 # from database.users_chats_db import db as dib
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram.raw.functions import Ping
-from mbot import LOG_GROUP, OWNER_ID, SUDO_USERS, Mbot, AUTH_CHATS, BUG, F_SUB, paste, F_SUB_CHANNEL_ID
+from mbot import LOG_GROUP, OWNER_ID, SUDO_USERS, Mbot, AUTH_CHATS, BUG, F_SUB, paste, F_SUB_CHANNEL_IDS, F_SUB_CHANNEL_INVITE_LINKS
 from os import execvp, sys, execl, environ, mkdir
 from apscheduler.schedulers.background import BackgroundScheduler
 import shutil
@@ -448,34 +448,56 @@ genius = Genius("api_key")
 #     await foo(c, m, cb=True)
 
 ##  & filters.private add this to respond only in private Chat
+
+from pyrogram import utils
+
+def get_peer_type_new(peer_id: int) -> str:
+    peer_id_str = str(peer_id)
+    if not peer_id_str.startswith("-"):
+        return "user"
+    elif peer_id_str.startswith("-100"):
+        return "channel"
+    else:
+        return "chat"
+
+utils.get_peer_type = get_peer_type_new
+
 @Mbot.on_message(filters.incoming & filters.text, group=-2)
 async def _(c, m):
     message = m
     Mbot = c
     try:
-        user_lang = get_user_language(message.from_user.id)  # Fetch user language from your function
-        strings = LANGUAGE_STRINGS.get(user_lang, LANGUAGE_STRINGS["en"])  # Default to English if not found
+        user_lang = get_user_language(message.from_user.id)
+        strings = LANGUAGE_STRINGS.get(user_lang, LANGUAGE_STRINGS["en"])
         user_id = message.from_user.id
     except:
         user_id = 5268375124
     if not m.text:
         return
     try:
-
         if is_maintenance_mode() and user_id not in SUDO_USERS:
             await m.reply_text(SLOW_RESPONSES.get(user_lang, {}).get("maintenance","🔧 The bot is under maintenance. Please try again later."))
             return
 
-        # Check Banned Users
         if user_id in banned_users:
             await m.reply_text(SLOW_RESPONSES.get(user_lang, {}).get("banned","You are banned from using this bot  ദ്ദി ༎ຶ‿༎ຶ ) "))
             return
             
-        if F_SUB and F_SUB_CHANNEL_ID:
-            if not str(F_SUB_CHANNEL_ID).startswith("-100"):
-               print(f"Skiping F_Sub as Your Id Must Start With -100 We Got {F_SUB_CHANNEL_ID}")
+        if F_SUB and F_SUB_CHANNEL_IDS:
+            # Validate channel IDs format
+            valid_channels = []
+            for channel_id in F_SUB_CHANNEL_IDS:
+                if not str(channel_id).startswith("-100"):
+                    print(f"Invalid F_SUB channel ID format: {channel_id} (must start with -100)")
+                else:
+                    valid_channels.append(channel_id)
+            
+            # Only proceed if there's at least one valid channel
+            if valid_channels:
+                await Fsub(message, Mbot, user_id)
             else:
-               await Fsub(message, Mbot, user_id)
+                print("Skipping F_Sub - No valid channel IDs configured")
+
     except (StopPropagation, ChatWriteForbidden):
         raise StopPropagation
     if message.text.startswith('/'):
@@ -670,71 +692,30 @@ async def search(Mbot: Mbot, query: CallbackQuery):
 
 @Mbot.on_callback_query(filters.regex(r"refresh"))
 async def refresh(Mbot, query):
-      try:
-          try:
-              user_id = query.from_user.id
-          except Exception:
-             return 
-          try:
-              get_member = await Mbot.get_chat_member(chat_id=F_SUB_CHANNEL_ID,user_id=user_id)
-          except UserNotParticipant:
-              try:
-                  join_channel_message = SLOW_RESPONSES.get(language, {}).get(
-    "join_channel",
-    "Please Join The Channel"  # Default English fallback
-)
+    try:
+        user_id = query.from_user.id
+        unjoined_channels = []
 
-                  await query.answer(join_channel_message, show_alert=True)
-              except QueryIdInvalid:
-                  join_channel_message = SLOW_RESPONSES.get(language, {}).get(
-    "join_channel",
-    "Please Join The Channel"  # Default English fallback
-)
+        # Check all channels
+        for channel_id in F_SUB_CHANNEL_IDS:
+            try:
+                channel_id = int(channel_id.strip())
+                await Mbot.get_chat_member(chat_id=channel_id, user_id=user_id)
+            except UserNotParticipant:
+                unjoined_channels.append(channel_id)
+            except Exception as e:
+                await Mbot.send_message(BUG, f"Refresh Error: {e}\n{traceback.format_exc()}")
 
-                  await query.answer(join_channel_message, show_alert=True)
-              await query.message.stop_propagation()
-          except PeerIdInvalid:
-              try:
-                  await Mbot.send_chat_action(chat_id=user_id,action=enums.ChatAction.TYPING)
-                  get_member = await Mbot.get_chat_member(chat_id=F_SUB_CHANNEL_ID,user_id=user_id)
-              except PeerIdInvalid:
-                  pass
-              except UserIsBlocked:
-                  pass
-              except UserNotParticipant:
-                  join_channel_message = SLOW_RESPONSES.get(language, {}).get(
-    "join_channel",
-    "Please Join The Channel"  # Default English fallback
-)
+        if not unjoined_channels:
+            await query.message.delete()
+            await query.answer("✅ Successfully verified all channels!", show_alert=True)
+            await query.message.reply("🎉 Congratulations! You've joined all required channels!")
+        else:
+            await query.answer("⚠️ Please join all required channels first!", show_alert=True)
 
-                  await query.answer(join_channel_message, show_alert=True)
-                  await query.message.stop_propagation()
-          await query.message.delete()
-          try:
-              congratulations_message = SLOW_RESPONSES.get(language, {}).get(
-    "unlocked", 
-    "Congratulations You Are Unlocked 🤝"  # Default English fallback
-)
-
-              await query.answer(congratulations_message, show_alert=True)
-          except:
-               pass
-          unlocked_message = SLOW_RESPONSES.get(language, {}).get(
-    "unlocked_message", 
-    "Congratulations You Had Unlocked Go Ahead 🤝 Keep The Bond With Us❣️"  # Default English fallback
-)
-
-          await query.message.reply(unlocked_message)
-      except (StopPropagation,AttributeError):
-          pass
-      except Exception as e:
-          await Mbot.send_message(BUG, f"#Fsub refresh module Exception Raised {e}\n {paste(traceback.format_exc())}")
-          unable_to_proceed_message = SLOW_RESPONSES.get(language, {}).get(
-    "unable_to_proceed", 
-    "503: Sorry, We Are Unable To Proceed It 🤕❣️"  # Default English fallback
-)
-
-          await query.message.reply(unable_to_proceed_message)    
-      for var in list(locals()):
-        if var != '__name__' and var != '__doc__':
-            del locals()[var]
+    except Exception as e:
+        await Mbot.send_message(BUG, f"Refresh Error: {e}\n{traceback.format_exc()}")
+        await query.answer("❌ Error verifying channels. Please try again later.", show_alert=True)   
+        for var in list(locals()):
+            if var != '__name__' and var != '__doc__':
+                del locals()[var]
