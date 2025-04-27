@@ -58,16 +58,16 @@ logging.basicConfig(
 logging.getLogger("pyrogram").setLevel(logging.WARNING)
 LOGGER = logging.getLogger(__name__)
 
+
 # Mandatory Variable
 try:
     API_ID = int(environ['API_ID'])
     API_HASH = environ['API_HASH']
     BOT_TOKEN = environ['BOT_TOKEN']
     OWNER_ID = int(environ['OWNER_ID'])
-except KeyError:
+except KeyError:  # Remove the accidental 'a' character
     LOGGER.debug("One or More ENV variable not found.")
     sys.exit(1)
-# Optional Variable
 # Optional Variable
 F_SUB = environ.get('F_SUB',False)
 F_SUB_CHANNEL_IDS = environ.get('F_SUB_CHANNEL_IDS', '').split(',')
@@ -135,7 +135,7 @@ class Mbot(Client):
         if not path.exists('/tmp/thumbnails/'):
             mkdir('/tmp/thumbnails/')
         for chat in AUTH_CHATS:
-            await self.send_photo(chat,"https://telegra.ph/file/97bc8a091ac1b119b72e4.jpg","**Spotify Download Started**")
+            await self.send_photo(chat,"https://telegra.ph/file/97bc8a091ac1b119b72e4.jpg","**ℤℙ𝕆𝕋𝕀𝔽𝕐 𝕊𝕥𝕒𝕣𝕥𝕖𝕕**")
         LOGGER.info(f"Bot Started As {BOT_INFO.username}\n")
     
     async def stop(self,*args):
