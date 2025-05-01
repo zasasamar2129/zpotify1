@@ -15,7 +15,7 @@
 [![Demo Bot](https://img.shields.io/badge/Try%20it%20out-%40z_downloadbot-blue?style=for-the-badge&logo=telegram)](https://t.me/z_downloadbot)
 
 ## 🌟 About
-ZPOTIFY is a powerful and open-source Spotify downloader bot designed for Telegram. It offers an easy and efficient way to download your favorite tracks from Spotify with additional features planned for continuous improvement. While inspired by [@NeedMusicRobot](https://github.com/rozari0/NeedMusicRobot), ZPOTIFY is a completely independent project with unique features.
+ZPOTIFY is a powerful and open-source Spotify downloader bot designed for Telegram. It offers an easy and efficient way to download your favorite tracks from Spotify with additional features planned for continuous improvement.ZPOTIFY is a completely independent project with unique features.
 
 ---
 
