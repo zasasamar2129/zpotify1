@@ -273,11 +273,11 @@ async def health_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 }
             },
             "downloaders": {
-                "youtube": bool(youtube_dl),
+                #"youtube": bool(youtube_dl),
                 "instagram": bool(instagram_dl),
                 "reddit": bool(reddit_dl),
                 "pinterest": bool(pinterest_dl),
-                "spotify": bool(spotify_dl)
+                #"spotify": bool(spotify_dl)
             },
             "statistics": {
                 "total_downloads": stats['total_downloads'],
@@ -349,11 +349,11 @@ async def get_health_data() -> Dict:
                 }
             },
             "downloaders": {
-                "youtube": bool(youtube_dl),
+                #"youtube": bool(youtube_dl),
                 "instagram": bool(instagram_dl),
                 "reddit": bool(reddit_dl),
                 "pinterest": bool(pinterest_dl),
-                "spotify": bool(spotify_dl)
+                #"spotify": bool(spotify_dl)
             },
             "statistics": {
                 "total_downloads": stats['total_downloads'],
