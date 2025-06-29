@@ -1,14 +1,14 @@
 {
-  "name": "Spotify Downloa",
+  "name": "ZPOTIFY",
   "description": "A simple Telegram bot to download music.",
   "keywords": [
     "bot",
     "music",
     "music downloader"
   ],
-  "repository": "https://github.com/masterolic/",
-  "website": "https://t.me/Spotify_downloa",
-  "success_url": "https://t.me/spotify_downloa_bot",
+  "repository": "https://github.com/zasasamar2129",
+  "website": "https://t.me/Zpotify1",
+  "success_url": "https://t.me/z_downloadbot",
   "env": {
     "API_ID": {
       "description": "Your Telegram API ID",
@@ -43,11 +43,11 @@
     },
     "SPOTIPY_CLIENT_SECRET": {
       "description": "The client secret of the Spotify API",
-      "value": "0f02b7c483c04257984695007a4a8d5c"
+      "value": "3f5b9d80db144f38a4a37ddb8e475d3e"
     },
     "SPOTIPY_CLIENT_ID": {
       "description": "The client ID of the Spotify API",
-      "value": "4fe3fecfe5334023a1472516cc99d805"
+      "value": "06cfb634ed984567be73500c97beda58"
     }
   },
 "buildpacks": [
